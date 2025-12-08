@@ -295,36 +295,11 @@ const AdminService = {
   /**
    * Create a new panel
    */
-/**
- * Create a new panel
- */
   async createPanel(panelData) {
     try {
-      // Generate base ID from title
-      let baseId = panelData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      let id = baseId;
-      let counter = 1;
-      
-      // Check if panel with this ID already exists
-      let panelExists = true;
-      while (panelExists) {
-        const { data: existingPanel, error: checkError } = await supabaseClient
-          .from('panels')
-          .select('id')
-          .eq('id', id)
-          .single();
-        
-        if (checkError && checkError.code === 'PGRST116') {
-          // PGRST116 means "no rows returned" - panel doesn't exist
-          panelExists = false;
-        } else if (existingPanel) {
-          // Panel exists, append counter
-          id = `${baseId}-${counter}`;
-          counter++;
-        } else {
-          panelExists = false;
-        }
-      }
+      // Generate UUID for the panel ID
+      const id = crypto.randomUUID ? crypto.randomUUID() : 
+        Date.now().toString(36) + Math.random().toString(36).substr(2);
       
       const insertData = {
         id: id,
@@ -337,16 +312,27 @@ const AdminService = {
         icon: panelData.icon || null
       };
 
+      console.log('Creating panel with data:', insertData);
+
       const { data, error } = await supabaseClient
         .from('panels')
         .insert(insertData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error details:', error);
+        throw error;
+      }
+      
+      console.log('Panel created successfully:', data);
       return data;
     } catch (error) {
-      console.error('Create panel error:', error);
+      console.error('Create panel error details:', {
+        message: error.message,
+        code: error.code,
+        details: error.details
+      });
       throw error;
     }
   },
