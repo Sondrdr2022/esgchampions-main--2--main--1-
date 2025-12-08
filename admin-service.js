@@ -295,10 +295,36 @@ const AdminService = {
   /**
    * Create a new panel
    */
+/**
+ * Create a new panel
+ */
   async createPanel(panelData) {
     try {
-      // Generate ID from title (lowercase, replace spaces with hyphens)
-      const id = panelData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      // Generate base ID from title
+      let baseId = panelData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      let id = baseId;
+      let counter = 1;
+      
+      // Check if panel with this ID already exists
+      let panelExists = true;
+      while (panelExists) {
+        const { data: existingPanel, error: checkError } = await supabaseClient
+          .from('panels')
+          .select('id')
+          .eq('id', id)
+          .single();
+        
+        if (checkError && checkError.code === 'PGRST116') {
+          // PGRST116 means "no rows returned" - panel doesn't exist
+          panelExists = false;
+        } else if (existingPanel) {
+          // Panel exists, append counter
+          id = `${baseId}-${counter}`;
+          counter++;
+        } else {
+          panelExists = false;
+        }
+      }
       
       const insertData = {
         id: id,
