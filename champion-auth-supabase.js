@@ -157,26 +157,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         const originalText = linkedinLoginBtn.innerHTML;
         linkedinLoginBtn.innerHTML = '<span>Opening LinkedIn...</span>';
         
-        // Initiate LinkedIn OAuth popup
-        await SupabaseService.signInWithLinkedIn();
-        
-        // If successful, redirect to dashboard
-        window.location.href = 'champion-dashboard.html';
+        // IMPORTANT: use the OIDC provider key
+        const redirectUrl = `${window.location.origin}/linkedin-callback.html`;
+        await supabaseClient.auth.signInWithOAuth({
+          provider: 'linkedin_oidc',
+          options: {
+            redirectTo: redirectUrl,
+            scopes: 'openid profile email'
+          }
+        });
+
+        // If successful, Supabase will redirect; for popup flow you can rely on linkedin-callback.html
       } catch (error) {
         console.error('LinkedIn login error:', error);
         
-        // Show user-friendly error message
         const errorMessage = error.message || 'Failed to initiate LinkedIn login. Please try again.';
         if (errorMessage.includes('blocked')) {
           alert('Popup was blocked. Please allow popups for this site and try again.');
         } else if (errorMessage.includes('cancelled')) {
-          // User cancelled, don't show error
           console.log('LinkedIn authentication cancelled by user');
         } else {
           alert(errorMessage);
         }
         
-        // Reset button
         linkedinLoginBtn.disabled = false;
         linkedinLoginBtn.innerHTML = originalText;
       }
