@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESG Champions - Login</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="stif-pattern">
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">stif.</a>
+      <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About STIF</a>
+        <a href="#" id="membership-btn" class="btn-primary">Membership</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main style="min-height: calc(100vh - 200px); padding: 4rem 0;">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="index.html">Home</a> / <span>ESG Champions Login</span>
+      </div>
+
+      <div class="form-container">
+        <!-- Header -->
+        <div class="text-center mb-12">
+          <h1 class="mb-4">ESG Champions Login</h1>
+          <p class="text-gray" style="font-size: 1.125rem;">Sign in to access your dashboard and continue your sustainability review</p>
+        </div>
+
+        <!-- Form -->
+       <form id="champion-login-form" class="form-card stif-card">
+          <!-- Email -->
+          <div class="form-group">
+            <label for="login-email">
+              Email Address <span style="color: #ef4444;">*</span>
+            </label>
+            <input type="email" id="login-email" name="email" placeholder="champion@example.com" required>
+          </div>
+          
+          <script>
+            // Pre-fill email from URL parameter (when redirected from registration)
+            document.addEventListener('DOMContentLoaded', () => {
+              const urlParams = new URLSearchParams(window.location.search);
+              const email = urlParams.get('email');
+              if (email) {
+                const emailInput = document.getElementById('login-email');
+                if (emailInput) {
+                  emailInput.value = decodeURIComponent(email);
+                  // Show a helpful message
+                  const emailGroup = emailInput.closest('.form-group');
+                  if (emailGroup && !document.getElementById('email-exists-message')) {
+                    const message = document.createElement('p');
+                    message.id = 'email-exists-message';
+                    message.style.color = '#0D4D6C';
+                    message.style.fontSize = '0.875rem';
+                    message.style.marginTop = '0.5rem';
+                    message.textContent = '✓ This email is already registered. Please log in with your password.';
+                    emailGroup.appendChild(message);
+                  }
+                }
+              }
+            });
+          </script>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="login-password">
+              Password <span style="color: #ef4444;">*</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+              <button type="button" class="password-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 500;">
+            Sign In
+          </button>
+
+          <!-- Divider -->
+          <div style="display: flex; align-items: center; margin: 1.5rem 0;">
+            <div style="flex: 1; height: 1px; background-color: #e5e7eb;"></div>
+            <span style="padding: 0 1rem; color: #6b7280; font-size: 0.875rem;">or</span>
+            <div style="flex: 1; height: 1px; background-color: #e5e7eb;"></div>
+          </div>
+
+          <!-- LinkedIn Login Button -->
+          <button type="button" id="linkedin-login-btn" class="btn-linkedin" style="width: 100%; padding: 0.75rem; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+            Continue with LinkedIn
+          </button>
+
+          <!-- Links -->
+          <div class="text-center mt-6">
+            <p class="text-gray mb-2">
+              Don't have an account? <a href="champion-register.html" class="text-primary" style="text-decoration: underline;">Register as Champion</a>
+            </p>
+            <p class="text-gray">
+              <a href="#" class="text-primary" style="text-decoration: underline;">Forgot password?</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="logo mb-6">stif.</div>
+          <div class="social-links">
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </a>
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h3>Company</h3>
+          <ul>
+            <li><a href="about.html">About STIF</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="terms.html">Terms of service</a></li>
+            <li><a href="privacy.html">Privacy policy</a></li>
+            <li><a href="cookie-policy.html">Cookie policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Schedule an appointment</h3>
+          <button class="btn-primary" style="width: 100%;">📅 Schedule</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Membership Modal -->
+  <div id="membership-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-6">
+        <h2>Choose your account type</h2>
+        <button id="close-membership-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <button id="business-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+          Business
+        </button>
+        <button id="champion-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+          ESG Champion
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-service.js"></script>
+  <script src="champion-auth-supabase.js"></script>
+  <script src="admin-service.js"></script>
+  <script src="mobile-menu.js"></script>
+  <script src="membership-modal.js"></script>
+  <script src="dynamic-navigation.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>
+

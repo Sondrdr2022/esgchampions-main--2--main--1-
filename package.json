@@ -1,0 +1,21 @@
+{
+  "name": "stif-website",
+  "version": "1.0.0",
+  "description": "STIF - Democratising Sustainability for Every Business",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "node build.js",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "sustainability",
+    "esg",
+    "stif"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}
+

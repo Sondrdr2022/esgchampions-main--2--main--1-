@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Sustainability Snapshot - STIF</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Dashboard Specific Styles */
+    .stif-score-card {
+      background: linear-gradient(135deg, #0D4D6C 0%, #1a6b8a 100%);
+      color: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .stif-score-number {
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1;
+      margin: 1rem 0;
+    }
+    .mission-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .mission-progress {
+      height: 8px;
+      background-color: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    .mission-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0D4D6C 0%, #4A9FD8 100%);
+      transition: width 0.3s ease;
+    }
+    .panel-card-dashboard {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .panel-card-dashboard:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .impact-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .impact-high {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    .impact-medium {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .impact-low {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .status-not-started {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+    .status-in-progress {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+    .status-completed {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .activity-rewards-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 1.5rem;
+    }
+    .activity-rewards-tab {
+      padding: 0.75rem 1.5rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #6b7280;
+      transition: all 0.2s;
+    }
+    .activity-rewards-tab:hover {
+      color: #0D4D6C;
+    }
+    .activity-rewards-tab.active {
+      color: #0D4D6C;
+      border-bottom-color: #0D4D6C;
+    }
+    .tab-content-panel {
+      display: none;
+    }
+    .tab-content-panel.active {
+      display: block;
+    }
+    .credit-score-card {
+      background: #0D4D6C;
+      color: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .credit-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .credit-item:last-child {
+      border-bottom: none;
+    }
+    .credit-item-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .star-rating {
+      display: flex;
+      gap: 0.25rem;
+    }
+    .star-rating .star {
+      color: #fbbf24;
+      font-size: 1rem;
+    }
+    .total-credits {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 2px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .why-reviews-matter {
+      background: #f9fafb;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      margin-top: 3rem;
+    }
+    .why-reviews-matter ul {
+      list-style: none;
+      padding: 0;
+    }
+    .why-reviews-matter li {
+      padding: 0.75rem 0;
+      padding-left: 2rem;
+      position: relative;
+    }
+    .why-reviews-matter li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #0D4D6C;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+    @media (max-width: 768px) {
+      .grid.grid-cols-3 {
+        grid-template-columns: 1fr;
+      }
+      .stif-score-number {
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+<body class="stif-background stif-pattern">
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">stif.</a>
+      <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About STIF</a>
+        <a href="#" id="membership-btn" class="btn-primary">Membership</a>
+        <a href="ranking.html" class="btn-primary">Rankings</a>
+        <a href="#" id="logout-btn" class="btn-secondary">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main style="min-height: calc(100vh  200px); padding: 2rem 0;">
+      <div class="dashboard-bg">
+    <div class="container">
+      <!-- Page Title -->
+      <div class="mb-8">
+        <h1 class="mb-2">Your Sustainability Snapshot</h1>
+        <p class="text-gray">Welcome back, <span id="champion-name">Champion</span>!</p>
+      </div>
+
+      <!-- Top Section: STIF Score and Mission -->
+<div class="stif-hero-card">
+  <div class="stif-hero-left">
+    <div class="stif-label">STIF Score</div>
+    <div class="stif-number" id="stif-score-number">62</div>
+    <div class="stif-sub">out of 100</div>
+    <div class="stif-sub">Reward + Impact</div>
+    <button class="btn-primary stif-btn" id="continue-where-left-btn">
+      <span id="continue-btn-text">Continue where you left off</span>
+    </button>
+  </div>
+</div>
+
+
+            <!-- STIF Score Card ... -->
+      </div> <!-- STIF score card container kapanışı -->
+    </div> <!-- grid col ... kapanışı -->
+
+    <!-- ACCOUNT COMPLETION CARD -->
+<div class="container">
+  <div id="account-completion-card" class="mission-card account-completion-card hidden">
+    <div class="completion-circle">
+      <span id="completion-percent">75%</span>
+    </div>
+    <div class="completion-content">
+      <h2 class="mb-2">Complete Your Account</h2>
+      <p class="text-gray" id="completion-message">
+        Add information to finish setting up your account.
+      </p>
+      <button id="completion-cta" class="btn-primary" style="margin-top: 0.75rem;">
+        Continue
+      </button>
+    </div>
+  </div>
+</div>
+<!-- /ACCOUNT COMPLETION CARD -->
+
+
+      <!-- Main Content Area: Panels and Activity/Rewards -->
+      <div class="grid grid-cols-3 gap-6">
+        <!-- Left Column: Panels -->
+        <div style="grid-column: span 2;">
+           <!-- Recommended Panels Section -->
+      <div class="mb-8">
+<h2 class="mb-6 recommended-title">Recommended Panels to Start With</h2>
+        <div class="grid grid-cols-3 gap-6" id="recommended-panels">
+          <!-- Recommended panels will be loaded here -->
+        </div>
+<div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 1.5rem; gap: 1.5rem;">
+<div class="panels-header">
+  <h2 class="mb-0 dashboard-section-title">Panels</h2>
+  <a href="champion-panels.html"
+     class="btn-secondary browse-panels-btn">
+     Browse All Panels
+  </a>
+</div>
+          </div>
+          <div id="all-panels-grid" class="grid grid-cols-2 gap-4">
+            <!-- All panels will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Right Column: Activity & Rewards -->
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="activity-rewards-tabs" style="flex: 1;">
+              <button class="activity-rewards-tab active" data-tab="activity">Activity</button>
+              <button class="activity-rewards-tab" data-tab="rewards">Rewards</button>
+            </div>
+          </div>
+
+          <!-- Activity Tab -->
+          <div id="activity-tab" class="tab-content-panel active">
+            <div class="card">
+              <h3 class="mb-4">Recent Activity</h3>
+              <div id="recent-activity-list">
+                <!-- Activity items will be loaded here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Rewards Tab -->
+          <div id="rewards-tab" class="tab-content-panel">
+            <div class="credit-score-card">
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                <span style="font-size: 1.5rem;">⭐</span>
+                <h3 style="margin: 0; color: white;">Credit Score Summary</h3>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>⭐</span>
+                  <span>Indicator Necessity</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>✓</span>
+                  <span>Gap Detection / Missing Requirement</span>
+                </div>
+                <span style="font-weight: 600;">+4</span>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>●</span>
+                  <span>SME Reporting Difficulty (Moderate)</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>🏷️</span>
+                  <span>Materiality Tags (2 selected)</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>⭐</span>
+                  <span>Impact Score on SMEs</span>
+                  <div class="star-rating">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                  </div>
+                </div>
+                <span style="font-weight: 600;">+4</span>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>✓</span>
+                  <span>Version Appropriateness</span>
+                </div>
+                <span style="font-weight: 600;">+1</span>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>✨</span>
+                  <span>Validation Response Quality</span>
+                </div>
+                <span style="font-weight: 600;">+5</span>
+              </div>
+              
+              <div class="credit-item">
+                <div class="credit-item-label">
+                  <span>💬</span>
+                  <span>Additional Comments</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+              
+              <div class="total-credits">
+                <span>⭐</span>
+                <span>TOTAL CREDITS EARNED: <span id="total-credits-display">22</span> Credits</span>
+              </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 1rem;">
+              <button class="btn-secondary" id="view-credits-details-btn" style="width: 100%;">View details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Why Your Reviews Matter Section -->
+      <div class="why-reviews-matter">
+        <h2 class="mb-6">Why Your Reviews Matter</h2>
+        <ul style="margin-top: 0.75rem; display: grid; gap: 0.5rem; padding-left: 1.25rem;">
+  <li>
+    Your insights train the STIF Intelligence Engine to deliver smarter, fairer, expert-driven recommendations.
+  </li>
+  <li>
+    You shape the ESG baseline for SMEs, directing small businesses toward what truly drives impact.
+  </li>
+  <li>
+    Your reviews strengthen trust in sustainability reporting and accelerate industry-wide progress.
+  </li>
+</ul>
+        <div style="margin-top: 1.5rem; text-align: center;">
+          <button class="btn-primary" id="scoring-calculated-btn">See how scoring is calculated</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="logo mb-6">stif.</div>
+          <div class="social-links">
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </a>
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h3>Company</h3>
+          <ul>
+            <li><a href="about.html">About STIF</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="terms.html">Terms of service</a></li>
+            <li><a href="privacy.html">Privacy policy</a></li>
+            <li><a href="cookie-policy.html">Cookie policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Schedule an appointment</h3>
+          <button class="btn-primary" style="width: 100%;">📅 Schedule</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Indicator Selection Modal -->
+  <div id="indicator-selection-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 48rem;">
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="selection-modal-title">Select Indicators to Review</h2>
+        <button id="close-selection-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="mb-4">
+        <div class="flex justify-between items-center mb-4">
+          <p class="text-gray">Choose the indicators you want to validate for this panel.</p>
+          <div class="flex gap-2">
+            <button id="select-all-indicators" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Select All</button>
+            <button id="deselect-all-indicators" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Deselect All</button>
+          </div>
+        </div>
+        <div id="indicators-selection-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 1rem;">
+          <!-- Indicators checkboxes will be loaded here -->
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <button id="proceed-review-btn" class="btn-primary" style="flex: 1; padding: 0.75rem;">Proceed to Review</button>
+        <button id="cancel-selection-btn" class="btn-secondary" style="padding: 0.75rem 1.5rem;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scoring Calculation Modal -->
+  <div id="scoring-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="flex justify-between items-center mb-6">
+        <h2>How Scoring is Calculated</h2>
+        <button id="close-scoring-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="credit-score-card" style="background: white; color: #111827;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; color: #0D4D6C;">
+          <span style="font-size: 1.5rem;">⭐</span>
+          <h3 style="margin: 0;">Credit Score Summary</h3>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>⭐</span>
+            <span>Indicator Necessity</span>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+2</span>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>✓</span>
+            <span>Gap Detection / Missing Requirement</span>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+4</span>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>●</span>
+            <span>SME Reporting Difficulty (Moderate)</span>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+2</span>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>🏷️</span>
+            <span>Materiality Tags (2 selected)</span>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+2</span>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>⭐</span>
+            <span>Impact Score on SMEs</span>
+            <div class="star-rating">
+              <span class="star">★</span>
+              <span class="star">★</span>
+              <span class="star">★</span>
+              <span class="star">★</span>
+              <span class="star">★</span>
+            </div>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+4</span>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>✓</span>
+            <span>Version Appropriateness</span>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+1</span>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>✨</span>
+            <span>Validation Response Quality</span>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+5</span>
+        </div>
+        
+        <div class="credit-item" style="border-bottom-color: #e5e7eb;">
+          <div class="credit-item-label">
+            <span>💬</span>
+            <span>Additional Comments</span>
+          </div>
+          <span style="font-weight: 600; color: #0D4D6C;">+2</span>
+        </div>
+        
+        <div class="total-credits" style="color: #0D4D6C; border-top-color: #e5e7eb;">
+          <span>⭐</span>
+          <span>TOTAL CREDITS EARNED: <span id="modal-total-credits">22</span> Credits</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Membership Modal -->
+  <div id="membership-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-6">
+        <h2>Choose your account type</h2>
+        <button id="close-membership-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <button id="business-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+          Business
+        </button>
+        <button id="champion-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+          ESG Champion
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-service.js"></script>
+  <script src="account-completion.js"></script>
+  <script src="champion-db-supabase.js"></script>
+  <script src="champion-dashboard.js"></script>
+  <script src="admin-service.js"></script>
+  <script src="mobile-menu.js"></script>
+  <script src="membership-modal.js"></script>
+  <script src="dynamic-navigation.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>
+

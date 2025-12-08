@@ -1,0 +1,1950 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2.25rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+/* Layout Utilities */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+}
+
+
+.section {
+  padding: 4rem 0;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
+.gap-12 {
+  gap: 3rem;
+}
+
+.gap-16 {
+  gap: 4rem;
+}
+
+/* Header Styles */
+header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: #030213;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+nav a {
+  color: #374151;
+  font-size: 1rem;
+}
+
+nav a:hover {
+  color: #111827;
+}
+
+.btn-primary {
+  padding: 0.5rem 1.25rem;
+  background-color: #0D4D6C;
+  color: white;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #0A3D56;
+}
+
+.btn-secondary {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 0.375rem;
+  background-color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+/* LinkedIn Button Styles */
+.btn-linkedin {
+  padding: 0.5rem 1.25rem;
+  background-color: #0077b5;
+  color: white;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-linkedin:hover {
+  background-color: #005885;
+}
+
+.btn-linkedin:active {
+  background-color: #004d73;
+}
+
+.btn-linkedin svg {
+  flex-shrink: 0;
+}
+
+/* LinkedIn Share Button (for invite modal) */
+.btn-linkedin-share {
+  padding: 0.75rem 1.5rem;
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-linkedin-share:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-linkedin-share:active {
+  background-color: #f3f4f6;
+}
+
+.btn-linkedin-share svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* Footer Styles */
+footer {
+  background-color: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 3rem 0;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.footer-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section ul li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+
+.footer-section ul li a:hover {
+  color: #111827;
+}
+
+.social-links {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.social-link {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.social-link:hover {
+  background-color: #e5e7eb;
+}
+
+.social-link svg {
+  width: 1rem;
+  height: 1rem;
+  color: #374151;
+}
+
+/* Hero Section */
+.hero {
+  padding: 4rem 0;
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3rem;
+  align-items: center;
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.hero-text p {
+  color: #4b5563;
+  margin-bottom: 2rem;
+  line-height: 1.75;
+}
+
+.hero-visual {
+  position: relative;
+}
+
+.gradient-circle {
+  width: 20rem;
+  height: 20rem;
+  margin: 0 auto;
+  background: linear-gradient(to bottom right, #dbeafe, #cffafe);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.gradient-circle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, #dbeafe, #cffafe);
+  border-radius: 50%;
+  filter: blur(3rem);
+  opacity: 0.6;
+}
+
+.inner-circle {
+  width: 12rem;
+  height: 12rem;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  font-size: 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.decorative-icon {
+  position: absolute;
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+/* Cards */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+}
+
+.card-icon {
+  width: 4rem;
+  height: 4rem;
+  background-color: #eff6ff;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.card p {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+/* FAQ Accordion */
+.faq-item {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 2px solid #e5e7eb;
+  overflow: hidden;
+  transition: all 0.2s;
+  margin-bottom: 1rem;
+}
+
+.faq-item.active {
+  border-color: #4A9FD8;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.faq-question {
+  width: 100%;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+.faq-question:hover {
+  background-color: #f9fafb;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.faq-answer.active {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.faq-answer-content {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  color: #4b5563;
+  line-height: 1.75;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 1rem;
+}
+
+.faq-toggle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.faq-toggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Form Styles */
+.form-container {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.form-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 2rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #0D4D6C;
+  box-shadow: 0 0 0 2px rgba(13, 77, 108, 0.1);
+}
+
+.form-group input.error {
+  border-color: #ef4444;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.25rem;
+}
+
+.password-toggle:hover {
+  color: #374151;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  cursor: pointer;
+}
+
+.checkbox-group label {
+  margin-bottom: 0;
+  cursor: pointer;
+}
+
+/* Background Sections */
+.bg-gray {
+  background-color: #f9fafb;
+}
+
+.bg-blue {
+  background-color: #0D4D6C;
+}
+
+/* Text Colors */
+.text-gray {
+  color: #4b5563;
+}
+
+.text-gray-dark {
+  color: #374151;
+}
+
+.text-primary {
+  color: #0D4D6C;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Spacing */
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.mb-12 {
+  margin-bottom: 3rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.mt-12 {
+  margin-top: 3rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.py-16 {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.py-20 {
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Flexbox */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding: 1.5rem 0;
+}
+
+.breadcrumb a {
+  color: #6b7280;
+}
+
+.breadcrumb a:hover {
+  color: #111827;
+}
+
+.breadcrumb span {
+  color: #111827;
+}
+
+/* Cookie Consent Banner */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  padding: 1.5rem;
+}
+
+.cookie-banner-content {
+  max-width: 1280px;
+  width: 100%;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  pointer-events: auto;
+}
+
+.cookie-banner.hidden {
+  display: none;
+}
+
+/* Hamburger Menu Button */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 1001;
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  width: 1.5rem;
+  height: 2px;
+  background-color: #374151;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.mobile-menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Mobile Navigation */
+nav.mobile-nav-active {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  z-index: 1000;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 5rem 1.5rem 2rem;
+  gap: 1.5rem;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+nav.mobile-nav-active a,
+nav.mobile-nav-active span {
+  width: 100%;
+  padding: 0.75rem 0;
+  font-size: 1.125rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+nav.mobile-nav-active .btn-primary,
+nav.mobile-nav-active .btn-secondary {
+  width: 100%;
+  text-align: center;
+  padding: 0.875rem 1.25rem;
+  margin-top: 0.5rem;
+}
+
+/* Touch-friendly buttons and inputs */
+@media (hover: none) and (pointer: coarse) {
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  input,
+  select,
+  textarea,
+  button {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  .faq-question {
+    min-height: 44px;
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+/* Responsive Tables */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+}
+
+table {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+table th,
+table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+table th {
+  font-weight: 600;
+  background-color: #f9fafb;
+}
+
+/* Responsive Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Responsive Design - Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 1.25rem;
+  }
+  
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .section {
+    padding: 3rem 0;
+  }
+  
+  .hero {
+    padding: 3rem 0;
+  }
+  
+  .gradient-circle {
+    width: 16rem;
+    height: 16rem;
+  }
+  
+  .inner-circle {
+    width: 10rem;
+    height: 10rem;
+    font-size: 3rem;
+  }
+  
+  .form-card {
+    padding: 1.5rem;
+  }
+  
+  .modal-content {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+}
+
+/* Responsive Design - Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
+  
+  /* Typography */
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+  
+  /* Header and Navigation */
+  header {
+    padding: 0.75rem 0;
+    position: relative;
+  }
+  
+  .header-content {
+    position: relative;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  
+  nav {
+    display: none;
+  }
+  
+  nav.mobile-nav-active {
+    display: flex;
+  }
+  
+  .logo {
+    font-size: 1.25rem;
+  }
+  
+  /* Hero Section */
+  .hero {
+    padding: 2rem 0;
+  }
+  
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .hero-text h1 {
+    font-size: 1.875rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-text p {
+    font-size: 0.9375rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .gradient-circle {
+    width: 12rem;
+    height: 12rem;
+  }
+  
+  .inner-circle {
+    width: 8rem;
+    height: 8rem;
+    font-size: 2.5rem;
+  }
+  
+  .decorative-icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.25rem;
+  }
+  
+  /* Grid Layouts */
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .gap-16 {
+    gap: 2rem;
+  }
+  
+  .gap-12 {
+    gap: 1.5rem;
+  }
+  
+  /* Cards */
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .card-icon {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.5rem;
+  }
+  
+  /* Forms */
+  .form-container {
+    max-width: 100%;
+  }
+  
+  .form-card {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.875rem 1rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Buttons */
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    width: 100%;
+    min-height: 44px;
+  }
+  
+  /* Footer */
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  footer {
+    padding: 2rem 0;
+  }
+  
+  /* Section Spacing */
+  .section {
+    padding: 2.5rem 0;
+  }
+  
+  .mb-12 {
+    margin-bottom: 2rem;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Breadcrumb */
+  .breadcrumb {
+    padding: 1rem 0;
+    font-size: 0.8125rem;
+  }
+  
+  /* Modal */
+  .modal {
+    padding: 1rem;
+  }
+  
+  .modal-content {
+    max-width: 100%;
+    padding: 1.5rem;
+    max-height: 95vh;
+    border-radius: 0.5rem;
+  }
+  
+  /* FAQ */
+  .faq-question {
+    padding: 1.25rem 1rem;
+    font-size: 0.9375rem;
+  }
+  
+  .faq-answer-content {
+    padding: 0 1rem 1.25rem;
+    font-size: 0.9375rem;
+  }
+  
+  /* Cookie Banner */
+  .cookie-banner {
+    padding: 1rem;
+  }
+  
+  .cookie-banner-content {
+    padding: 1.25rem;
+  }
+  
+  /* Review Cards */
+  .review-card {
+    padding: 1.25rem;
+  }
+  
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .review-meta {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .review-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .review-actions button {
+    width: 100%;
+  }
+  
+  /* Panel Cards */
+  .panel-card {
+    padding: 1.25rem;
+  }
+  
+  /* Dashboard */
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .account-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Participation History */
+  .participation-item {
+    padding: 1rem;
+  }
+  
+  /* Search and Filter */
+  #panel-search,
+  #panel-filter-domain,
+  #panel-sort {
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Indicator Selection Modal */
+  .indicator-selection-modal .modal-content {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+  }
+}
+
+/* Responsive Design - Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding: 0 0.875rem;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .hero-text h1 {
+    font-size: 1.625rem;
+  }
+  
+  .gradient-circle {
+    width: 10rem;
+    height: 10rem;
+  }
+  
+  .inner-circle {
+    width: 6rem;
+    height: 6rem;
+    font-size: 2rem;
+  }
+  
+  .form-card {
+    padding: 1.25rem;
+  }
+  
+  .card {
+    padding: 1.25rem;
+  }
+  
+  .modal-content {
+    padding: 1.25rem;
+  }
+  
+  .section {
+    padding: 2rem 0;
+  }
+  
+  /* Two-column grid for small items */
+  .grid-cols-2-small {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero {
+    padding: 1.5rem 0;
+  }
+  
+  .modal-content {
+    max-height: 85vh;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .mobile-menu-toggle,
+  nav,
+  header,
+  footer,
+  .btn-primary,
+  .btn-secondary {
+    display: none !important;
+  }
+  
+  .container {
+    max-width: 100%;
+    padding: 0;
+  }
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  max-width: 32rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #111827;
+}
+
+/* Indicator Card Styles */
+.indicator-card {
+  transition: box-shadow 0.2s;
+}
+
+.indicator-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.vote-btn {
+  transition: all 0.2s;
+}
+
+.vote-btn:hover {
+  background-color: #0D4D6C !important;
+  color: white !important;
+  border-color: #0D4D6C !important;
+}
+
+.vote-btn.active {
+  background-color: #0D4D6C !important;
+  color: white !important;
+  border-color: #0D4D6C !important;
+}
+
+.comments-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #0D4D6C;
+  box-shadow: 0 0 0 2px rgba(13, 77, 108, 0.1);
+}
+
+/* Panel Card Styles */
+.panel-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.panel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Participation Item Styles */
+.participation-item {
+  transition: background-color 0.2s;
+}
+
+.participation-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* Indicator Tags in Selection Modal */
+.indicator-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.tag-high {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.tag-medium {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.tag-low {
+  background-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.tag-easy {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.tag-moderate {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.tag-difficult {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.tag-complex {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.tag-time {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.tag-framework {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+/* ==========================
+   STIF THEME – LOGIN PAGE
+   ========================== */
+
+/* İstersen bu renkleri Figma'daki gerçek kodlarla değiştir */
+:root {
+  --stif-bg: #f3f6fb;          /* ana arka plan */
+  --stif-card-bg: #ffffff;     /* form kartı */
+  --stif-primary: #002b5b;     /* koyu mavi - buton/başlık */
+  --stif-primary-dark: #001731;
+  --stif-text-main: #102742;   /* koyu yazı rengi */
+  --stif-muted: #6b7280;       /* açıklama yazıları */
+  --stif-radius-xl: 24px;
+}
+
+/* Varsayılan fontu STIF fontuna çeviriyoruz */
+body {
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* Sadece login sayfasına özel düzenler */
+.stif-login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at top, #e4edf7 0, #f3f6fb 45%, #ffffff 100%);
+  color: var(--stif-text-main);
+}
+
+/* Main alanını ortalayalım */
+.stif-login-page main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+/* Login formunun kutusu */
+.stif-login-page .form-container {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.stif-login-page .form-card {
+  background-color: var(--stif-card-bg);
+  border-radius: var(--stif-radius-xl);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.15);
+  padding: 2rem 2.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Başlık & metinler */
+.stif-login-page h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--stif-text-main);
+}
+
+.stif-login-page .text-gray {
+  color: var(--stif-muted);
+}
+
+/* Form alanları */
+.stif-login-page .form-group label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  color: var(--stif-text-main);
+}
+
+.stif-login-page .form-group input[type="email"],
+.stif-login-page .form-group input[type="password"] {
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stif-login-page .form-group input[type="email"]:focus,
+.stif-login-page .form-group input[type="password"]:focus {
+  border-color: var(--stif-primary);
+  box-shadow: 0 0 0 3px rgba(0, 43, 91, 0.15);
+}
+
+/* Şifre göster butonu */
+.stif-login-page .input-wrapper {
+  position: relative;
+}
+
+.stif-login-page .password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+/* Ana buton – sadece login sayfasında override */
+.stif-login-page .btn-primary {
+  background-color: var(--stif-primary);
+  color: #ffffff;
+  border-radius: 999px;
+  border: none;
+  padding: 0.75rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease,
+    box-shadow 0.15s ease;
+}
+
+.stif-login-page .btn-primary:hover {
+  background-color: var(--stif-primary-dark);
+  box-shadow: 0 12px 30px rgba(0, 43, 91, 0.25);
+  transform: translateY(-1px);
+}
+
+/* LinkedIn butonu */
+.stif-login-page .btn-linkedin {
+  background-color: #0a66c2;
+  color: #ffffff;
+  border-radius: 999px;
+  border: none;
+}
+
+.stif-login-page .btn-linkedin:hover {
+  background-color: #084d92;
+}
+
+/* Alt linkler */
+.stif-login-page .text-primary {
+  color: var(--stif-primary);
+}
+
+.stif-login-page .text-primary:hover {
+  text-decoration: underline;
+}
+
+/* Küçük ekranlarda formu biraz küçültelim */
+@media (max-width: 640px) {
+  .stif-login-page main {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .stif-login-page .form-card {
+    padding: 1.5rem 1.25rem;
+  }
+}
+/* ============================================
+   STIF BLUE THEME FOR LOGIN PAGE
+   ============================================ */
+
+:root {
+  --stif-primary: #002b5b;       /* Lacivert */
+  --stif-primary-light: #4f91cd; /* Açık mavi */
+  --stif-bg-light: #e8f0f9;      /* Açık mavi-gri */
+  --stif-bg-mid: #d0e0f0;        /* Orta ton */
+  --stif-bg-dark: #a9c3db;       /* Daha koyu ton */
+  --stif-text: #0f1f3d;          /* Başlık koyu */
+  --stif-muted: #6b7280;         /* Açıklama yazısı */
+  --stif-card-bg: #ffffff;       /* Kart beyazı */
+  --stif-radius-xl: 24px;
+}
+
+/* Arka planı Figma tarzı mavi-gri gradient yapıyoruz */
+.stif-login-page {
+  background: radial-gradient(
+      circle at top center,
+      var(--stif-bg-light) 0%,
+      var(--stif-bg-mid) 45%,
+      var(--stif-bg-dark) 90%
+    );
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--stif-text);
+}
+
+/* Login formunu STIF style box haline getiriyoruz */
+.stif-login-page .form-card {
+  background: var(--stif-card-bg);
+  border-radius: var(--stif-radius-xl);
+  padding: 2rem;
+  box-shadow: 0 25px 60px rgba(0, 43, 91, 0.20);
+  border: 1px solid rgba(0, 43, 91, 0.10);
+}
+
+/* Başlık */
+.stif-login-page h1 {
+  color: var(--stif-primary);
+  font-size: 1.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Form input’larını STIF style yapalım */
+.stif-login-page input[type="email"],
+.stif-login-page input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: #f9fbfd;
+}
+
+.stif-login-page input:focus {
+  border-color: var(--stif-primary);
+  box-shadow: 0 0 0 3px rgba(79, 145, 205, 0.35);
+}
+
+/* Buton — STIF style */
+.stif-login-page .btn-primary {
+  background: var(--stif-primary);
+  color: #fff;
+  border-radius: 999px;
+  border: none;
+  padding: 0.85rem;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.stif-login-page .btn-primary:hover {
+  background: var(--stif-primary-light);
+  box-shadow: 0 10px 25px rgba(0, 43, 91, 0.25);
+}
+
+/* LinkedIn button styling */
+.stif-login-page .btn-linkedin {
+  border-radius: 999px;
+  background: #0a66c2;
+  color: white;
+}
+
+.stif-login-page .btn-linkedin:hover {
+  background: #084a94;
+}
+
+/* Label styling */
+.stif-login-page label {
+  color: var(--stif-primary);
+  font-weight: 500;
+}
+
+/* Divider */
+.stif-login-page .form-divider {
+  border-top: 1px solid #d0d7df;
+  margin: 2rem 0;
+}
+
+/* Text links */
+.stif-login-page .text-primary {
+  color: var(--stif-primary);
+}
+/* ============================================
+   CLEAN GREY + SOFT BLUE NEW STIF THEME
+   ============================================ */
+
+:root {
+  --stif-grey-light: #f4f7fa;     /* Temiz, beyazımsı gri */
+  --stif-grey-mid: #e6ecf3;       /* Soft gri */
+  --stif-blue-soft: #c9dff7;      /* Pastel mavi */
+  --stif-primary: #002b5b;        /* Lacivert */
+  --stif-accent: #6ab3ff;         /* Şeker mavi */
+  --stif-card-bg: #ffffff;
+  --stif-shadow-blue: rgba(0, 80, 180, 0.12);
+}
+
+/* Yeni arka plan: soft gri → pastel mavi geçiş */
+.stif-background {
+  background: linear-gradient(
+    180deg,
+    var(--stif-grey-light) 0%,
+    var(--stif-grey-mid) 40%,
+    var(--stif-blue-soft) 100%
+  );
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Kartlar çok daha modern görünür */
+.stif-card {
+  background: var(--stif-card-bg);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px var(--stif-shadow-blue);
+  padding: 2rem;
+  border: 1px solid rgba(0, 43, 91, 0.08);
+}
+/* ============================================
+   STIF HEADINGS COLOR (NAVY BLUE)
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  color: #002B5B !important;   /* STIF koyu lacivert */
+  font-weight: 600;
+}
+/* ============================================
+   STIF BACKGROUND WAVE PATTERN
+   ============================================ */
+
+.stif-pattern {
+  background:
+    radial-gradient(circle at 40% 20%, rgba(0, 70, 160, 0.06) 0%, transparent 60%),
+    radial-gradient(circle at 80% 60%, rgba(0, 70, 160, 0.05) 0%, transparent 70%),
+    radial-gradient(circle at 20% 80%, rgba(0, 70, 160, 0.04) 0%, transparent 75%),
+    linear-gradient(180deg, #f4f7fa 0%, #e7edf4 40%, #c9dff7 100%);
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Dashbord - Why Your Reviews Matter spacing fix */
+.why-reviews-matter {
+    margin-left: 2rem !important;
+    max-width: 400px;
+}
+/* Dashboard – Why Your Reviews Matter alignment fix */
+.why-reviews-matter {
+  max-width: 480px;
+  margin-left: auto;      /* sağa yasla */
+  margin-top: 3.5rem;     /* kutuyu aşağı indir */
+}
+
+/* Tablet ve altı ekranlarda çok aşağı kaçmasın */
+@media (max-width: 1024px) {
+  .why-reviews-matter {
+    margin-top: 2rem;
+  }
+}
+
+/* Mobile’de sola gelsin, boşluk azalsın */
+@media (max-width: 768px) {
+  .why-reviews-matter {
+    margin-top: 1.5rem;
+    margin-left: 0;
+  }
+}
+/* ACCOUNT COMPLETION CARD – CENTERED NICELY */
+.completion-card {
+  max-width: 420px;
+  margin: 2.5rem auto;         /* ORTADA GÖRÜNSÜN */
+  padding: 1.75rem 2rem;
+  background: #ffffff;
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.10);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.completion-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 6px solid #0D4D6C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #0D4D6C;
+  background: #f9fafb;
+  font-size: 1rem;
+}
+/* Dashboard ana içeriği biraz daha içeri gelsin */
+main > .container {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  /* Mobile’da çok dayamasın, ama aşırı da olmasın */
+  main > .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+/* Dashboard başlıkları ve panelleri biraz içeri al */
+.dashboard-section-title {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* Üstteki önerilen paneller grid'i */
+#recommended-panels {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* Alttaki tüm paneller grid'i */
+#all-panels-grid {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* Hesap tamamlama kartı ve Why Your Reviews kutusu da aynı hizada olsun */
+#account-completion-card,
+.why-reviews-matter {
+  margin-left: 2.5rem;
+  margin-right: 2.5rem;
+}
+.recommended-title {
+    margin-left: 3rem;
+}
+#account-completion-card {
+    margin-left: 5rem;   /* Recommended title ile hizalar */
+}
+.panels-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.browse-panels-btn {
+  white-space: nowrap;
+  padding: 0.5rem 0.5rem;
+  font-size: 0.850rem;
+}
+/* STIF Score – geniş yatay hero kart (Complete Your Account ile aynı genişlikte) */
+.stif-hero-card {
+  background: #004D6C;          /* güzel koyu mavi */
+  color: #ffffff;               /* iç yazılar beyaz */
+  border-radius: 0.75rem;
+  padding: 2rem 3rem;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  width: 100%;
+    max-width: 960px; /* Complete Your Account kartına yakın genişlik */
+  margin: 0 auto 2rem auto;     /* ortala + altta boşluk */
+}
+
+.stif-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stif-label {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.stif-number {
+  font-size: 3rem;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.stif-sub {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.stif-btn {
+  margin-top: 1rem;
+  width: 230px;
+  background: #ffffff;
+  color: #004D6C;
+}
+
+/* Dashboard arka plan deseni – V2 */
+.dashboard-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Desen katmanı */
+.dashboard-bg::before {
+  content: "";
+  position: absolute;      /* artık absolute, body ile kavga yok */
+  inset: -150px;
+  z-index: -1;             /* dashboard-bg içindeki her şeyin arkasında */
+  pointer-events: none;
+
+  background:
+    /* Üst sol parlak halka */
+    radial-gradient(circle at 10% 0%,
+      rgba(255, 255, 255, 0.9) 0,
+      rgba(255, 255, 255, 0) 55%),
+
+    /* Üst sağ parlak halka */
+    radial-gradient(circle at 90% 5%,
+      rgba(255, 255, 255, 0.8) 0,
+      rgba(255, 255, 255, 0) 55%),
+
+    /* Alt sol mavi gölge */
+    radial-gradient(circle at -10% 70%,
+      rgba(0, 77, 108, 0.22) 0,
+      rgba(0, 77, 108, 0) 60%),
+
+    /* Alt sağ mavi gölge */
+    radial-gradient(circle at 110% 80%,
+      rgba(0, 77, 108, 0.22) 0,
+      rgba(0, 77, 108, 0) 60%),
+
+    /* Genel açık mavi arka plan */
+    linear-gradient(180deg,
+      #f3f7fb 0%,
+      #e6f0fb 40%,
+      #f5f8fc 100%);
+  background-repeat: no-repeat;
+}
+body {
+  background:
+    radial-gradient(circle at 10% 0%,
+      rgba(255, 255, 255, 0.9) 0,
+      rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 90% 5%,
+      rgba(255, 255, 255, 0.8) 0,
+      rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at -10% 70%,
+      rgba(0, 77, 108, 0.22) 0,
+      rgba(0, 77, 108, 0) 60%),
+    radial-gradient(circle at 110% 80%,
+      rgba(0, 77, 108, 0.22) 0,
+      rgba(0, 77, 108, 0) 60%),
+    linear-gradient(180deg,
+      #f3f7fb 0%,
+      #e6f0fb 40%,
+      #f5f8fc 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+.admin-stat-card {
+    background: #004d6b;   /* MAVİ ARKAPLAN */
+    color: rgb(255, 255, 255);          /* YAZILAR BEYAZ */
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.admin-stat-card .stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: rgb(255, 255, 255);
+}
+
+.admin-stat-card .stat-label {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+body {
+    font-family: 'Inter', sans-serif !important;
+}

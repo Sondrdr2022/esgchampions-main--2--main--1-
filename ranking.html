@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Rankings - STIF</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Table Styles */
+    #leaderboard-table, #weekly-leaderboard-table {
+      min-width: 600px;
+    }
+    #leaderboard-table th, #weekly-leaderboard-table th {
+      user-select: none;
+    }
+    #leaderboard-table th:hover, #weekly-leaderboard-table th:hover {
+      background-color: #f9fafb;
+    }
+    #leaderboard-table tbody tr:hover, #weekly-leaderboard-table tbody tr:hover {
+      background-color: #f9fafb;
+    }
+    @media (max-width: 768px) {
+      .grid.grid-cols-3 {
+        grid-template-columns: 1fr;
+      }
+      #leaderboard-table, #weekly-leaderboard-table {
+        font-size: 0.875rem;
+      }
+      #leaderboard-table th, #leaderboard-table td,
+      #weekly-leaderboard-table th, #weekly-leaderboard-table td {
+        padding: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">stif.</a>
+      <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About STIF</a>
+        <a href="#" id="membership-btn" class="btn-primary">Membership</a>
+        <div style="display: flex; gap: 0.5rem;">
+         
+          <a href="ranking.html" class="btn-primary">Rankings</a>
+        </div>
+        <a href="#" id="logout-btn" class="btn-secondary">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main style="min-height: calc(100vh - 200px); padding: 4rem 0;">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="index.html">Home</a> / <a href="champion-dashboard.html">Dashboard</a> / <span>Rankings</span>
+      </div>
+
+      <!-- Hero Section -->
+      <section class="section" style="padding-top: 2rem;">
+        <div class="mb-8">
+          <h1 class="mb-4">Community Rankings</h1>
+          <p class="text-gray" style="font-size: 1.125rem;">
+            See top contributors by peer reviews, indicators validated, and credits earned in the past 30 days.
+          </p>
+        </div>
+
+        <!-- Top Section: Top Champions and Credit Score Summary -->
+        <div class="grid grid-cols-3 gap-6 mb-8">
+          <!-- Top ESG Champions -->
+          <div class="card" style="grid-column: span 2;">
+            <h2 class="mb-6">Top ESG Champions</h2>
+            <div id="top-champions-container" class="grid grid-cols-3 gap-4 mb-6">
+              <!-- Top 3 champions will be loaded here -->
+            </div>
+            <button class="btn-primary" id="view-full-leaderboard-btn" style="width: 100%;">View full leaderboard</button>
+          </div>
+
+          <!-- Credit Score Summary -->
+          <div class="card" style="background: #0D4D6C; color: white;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+              <span style="font-size: 1.5rem;">⭐</span>
+              <h3 style="margin: 0; color: white;">Credit Score Summary</h3>
+            </div>
+            
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>⭐</span>
+                  <span style="font-size: 0.875rem;">Indicator Necessity</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+            </div>
+            
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>✓</span>
+                  <span style="font-size: 0.875rem;">Missing Requirement Identified</span>
+                </div>
+                <span style="font-weight: 600;">+4</span>
+              </div>
+            </div>
+            
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>●</span>
+                  <span style="font-size: 0.875rem;">SME Reporting Difficulty (Moderate)</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+            </div>
+            
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>🏷️</span>
+                  <span style="font-size: 0.875rem;">Materiality Tags (2 selected)</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+            </div>
+            
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>⭐</span>
+                  <span style="font-size: 0.875rem;">Impact Score on SMEs</span>
+                  <div style="display: flex; gap: 0.25rem; color: #fbbf24;">
+                    <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                  </div>
+                </div>
+                <span style="font-weight: 600;">+4</span>
+              </div>
+            </div>
+            
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>✓</span>
+                  <span style="font-size: 0.875rem;">Version Appropriateness</span>
+                </div>
+                <span style="font-weight: 600;">+1</span>
+              </div>
+            </div>
+            
+            <div style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>✨</span>
+                  <span style="font-size: 0.875rem;">Validation Response Quality</span>
+                </div>
+                <span style="font-weight: 600;">+5</span>
+              </div>
+            </div>
+            
+            <div style="padding: 0.75rem 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span>💬</span>
+                  <span style="font-size: 0.875rem;">Additional Comments</span>
+                </div>
+                <span style="font-weight: 600;">+2</span>
+              </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.5rem;">⭐</span>
+              <div>
+                <div style="font-size: 0.875rem; opacity: 0.9;">TOTAL CREDITS EARNED:</div>
+                <div style="font-size: 1.5rem; font-weight: 700;" id="total-credits-summary">22 Credits</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- See how scoring is calculated button -->
+        <div class="mb-8" style="text-align: right;">
+          <button class="btn-primary" id="scoring-calculated-btn" style="display: flex; align-items: center; gap: 0.5rem; margin-left: auto;">
+            <span>⭐</span>
+            <span>See how scoring is calculated</span>
+          </button>
+        </div>
+
+        <!-- Main Leaderboard Table -->
+        <div class="card mb-8">
+          <h2 class="mb-6">Rank</h2>
+          <div style="overflow-x: auto;">
+            <table id="leaderboard-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e5e7eb;">
+                  <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer;" data-sort="rank">Rank</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer;" data-sort="name">Name</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer;" data-sort="peer-reviews">Peer Reviews</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer;" data-sort="indicators">Indicators</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer;" data-sort="credits">Credits</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-tbody">
+                <!-- Leaderboard rows will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Weekly Leaderboard -->
+        <div class="card">
+          <h2 class="mb-6">Weekly Leaderboard</h2>
+          <div style="overflow-x: auto;">
+            <table id="weekly-leaderboard-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e5e7eb;">
+                  <th style="padding: 1rem; text-align: left; font-weight: 600;">Rank</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600;">Name</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600;">Peer Reviews</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600;">Indicators</th>
+                  <th style="padding: 1rem; text-align: left; font-weight: 600;">Credits</th>
+                </tr>
+              </thead>
+              <tbody id="weekly-leaderboard-tbody">
+                <!-- Weekly leaderboard rows will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="logo mb-6">stif.</div>
+          <div class="social-links">
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </a>
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h3>Company</h3>
+          <ul>
+            <li><a href="about.html">About STIF</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="terms.html">Terms of service</a></li>
+            <li><a href="privacy.html">Privacy policy</a></li>
+            <li><a href="cookie-policy.html">Cookie policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Schedule an appointment</h3>
+          <button class="btn-primary" style="width: 100%;">📅 Schedule</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Membership Modal -->
+  <div id="membership-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-6">
+        <h2>Choose your account type</h2>
+        <button id="close-membership-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <button id="business-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+          Business
+        </button>
+        <button id="champion-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
+          ESG Champion
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Integration for Rankings -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-service.js"></script>
+  <script src="admin-service.js"></script>
+  <script src="ranking-supabase.js"></script>
+  <script src="mobile-menu.js"></script>
+  <script src="membership-modal.js"></script>
+  <script src="dynamic-navigation.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>
+

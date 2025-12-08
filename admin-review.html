@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Review - STIF</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .review-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: box-shadow 0.2s;
+    }
+    .review-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .review-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .meta-label {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+    .meta-value {
+      font-weight: 500;
+      color: #111827;
+    }
+    .review-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .status-pending {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    .status-accepted {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .status-deleted {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    .filter-bar {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0D4D6C;
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #6b7280;
+    }
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    .admin-tab {
+      padding: 0.75rem 1.5rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #6b7280;
+      transition: all 0.2s;
+    }
+    .admin-tab:hover {
+      color: #0D4D6C;
+      background-color: #f9fafb;
+    }
+    .admin-tab.active {
+      color: #0D4D6C;
+      border-bottom-color: #0D4D6C;
+    }
+    .admin-tab-content {
+      display: none;
+    }
+    .admin-tab-content.active {
+      display: block;
+    }
+    .panel-card, .indicator-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: box-shadow 0.2s;
+    }
+    .panel-card:hover, .indicator-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .panel-header, .indicator-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .panel-actions, .indicator-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .panel-meta, .indicator-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+    .category-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-transform: capitalize;
+    }
+    .category-environmental {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    .category-social {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+    .category-governance {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">stif.</a>
+      <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About STIF</a>
+        <a href="ranking.html" class="btn-secondary">Rankings</a>
+        <a href="#" id="logout-btn" class="btn-secondary">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main style="min-height: calc(100vh - 200px); padding: 4rem 0;">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="index.html">Home</a> / <span>Admin Review</span>
+      </div>
+
+      <!-- Page Header -->
+      <div class="text-center mb-12">
+        <h1 class="mb-4">Admin Dashboard</h1>
+        <p class="text-gray" style="font-size: 1.125rem;">
+          Manage reviews, panels, and indicators
+        </p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="filter-bar" style="padding: 0; border: none; background: transparent;">
+        <div style="display: flex; gap: 0.5rem; border-bottom: 2px solid #e5e7eb;">
+          <button class="admin-tab active" data-tab="reviews">Review Submissions</button>
+          <button class="admin-tab" data-tab="panels">Panel Management</button>
+          <button class="admin-tab" data-tab="indicators">Indicator Management</button>
+        </div>
+      </div>
+
+      <!-- Reviews Tab Content -->
+      <div id="reviews-tab" class="admin-tab-content active">
+
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-container">
+        <div class="stat-card">
+          <div class="stat-number" id="stat-pending">0</div>
+          <div class="stat-label">Pending Reviews</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-accepted">0</div>
+          <div class="stat-label">Accepted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-deleted">0</div>
+          <div class="stat-label">Deleted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="stat-total">0</div>
+          <div class="stat-label">Total Reviews</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <div class="grid grid-cols-3 gap-4">
+          <div class="form-group">
+            <label>Status Filter</label>
+            <select id="status-filter" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="accepted">Accepted</option>
+              <option value="deleted">Deleted</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Panel Category</label>
+            <select id="panel-filter" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+              <option value="all">All Categories</option>
+              <option value="environmental">Environmental</option>
+              <option value="social">Social</option>
+              <option value="governance">Governance</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Search</label>
+            <input type="text" id="search-input" placeholder="Search by champion or indicator..." style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews List -->
+      <div id="reviews-container">
+        <div class="empty-state">
+          <div class="empty-state-icon">⏳</div>
+          <p>Loading reviews...</p>
+        </div>
+      </div>
+      </div>
+
+      <!-- Panels Tab Content -->
+      <div id="panels-tab" class="admin-tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h2>ESG Panels</h2>
+          <button id="add-panel-btn" class="btn-primary">+ Add Panel</button>
+        </div>
+
+        <!-- Panels List -->
+        <div id="panels-container">
+          <div class="empty-state">
+            <div class="empty-state-icon">⏳</div>
+            <p>Loading panels...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicators Tab Content -->
+      <div id="indicators-tab" class="admin-tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h2>ESG Indicators</h2>
+          <button id="add-indicator-btn" class="btn-primary">+ Add Indicator</button>
+        </div>
+
+        <!-- Indicator Filters -->
+        <div class="filter-bar" style="margin-bottom: 2rem;">
+          <div class="form-group">
+            <label>Filter by Panel</label>
+            <select id="indicator-panel-filter" style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+              <option value="all">All Panels</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Indicators List -->
+        <div id="indicators-container">
+          <div class="empty-state">
+            <div class="empty-state-icon">⏳</div>
+            <p>Loading indicators...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="logo mb-6">stif.</div>
+          <div class="social-links">
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </a>
+            <a href="#" class="social-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h3>Company</h3>
+          <ul>
+            <li><a href="about.html">About STIF</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="faq.html">FAQ</a></li>
+            <li><a href="terms.html">Terms of service</a></li>
+            <li><a href="privacy.html">Privacy policy</a></li>
+            <li><a href="cookie-policy.html">Cookie policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Schedule an appointment</h3>
+          <button class="btn-primary" style="width: 100%;">📅 Schedule</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Confirmation Modal -->
+  <div id="confirm-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="confirm-title">Confirm Action</h2>
+        <button id="close-confirm-modal" class="modal-close">&times;</button>
+      </div>
+      <p id="confirm-message" class="mb-6"></p>
+      <div class="flex gap-4">
+        <button id="confirm-btn" class="btn-primary" style="flex: 1;">Confirm</button>
+        <button id="cancel-confirm-btn" class="btn-secondary" style="flex: 1;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="success-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <div style="width: 80px; height: 80px; background-color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h2 style="margin-bottom: 1rem; font-size: 1.5rem; color: #065f46;">Success!</h2>
+      <p id="success-message" style="color: #6b7280; margin-bottom: 2rem; font-size: 1rem;">
+        Action completed successfully.
+      </p>
+      <div style="color: #6b7280; font-size: 0.875rem;">
+        Page will refresh automatically...
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Indicators Success Modal -->
+  <div id="add-indicators-success-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <div style="width: 80px; height: 80px; background-color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h2 style="margin-bottom: 1rem; font-size: 1.5rem; color: #065f46;">Success!</h2>
+      <p id="add-indicators-success-message" style="color: #6b7280; margin-bottom: 2rem; font-size: 1rem;">
+        Indicators added successfully.
+      </p>
+      <div style="color: #6b7280; font-size: 0.875rem;">
+        Page will refresh automatically...
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Form Modal -->
+<div id="panel-form-modal" class="modal hidden">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="flex justify-between items-center mb-6">
+      <h2 id="panel-form-title">Add Panel</h2>
+      <button id="close-panel-form-modal" class="modal-close">&times;</button>
+    </div>
+          <form id="panel-form">
+        <input type="hidden" id="panel-form-id" value="">
+
+        <!-- Panel Title -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="panel-title">Panel Title <span style="color: #ef4444;">*</span></label>
+          <input
+            type="text"
+            id="panel-title"
+            required
+            style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+            placeholder="e.g., Climate & GHG Emissions Panel">
+        </div>
+
+        <!-- Panel Category + Impact -->
+        <div class="grid grid-cols-2 gap-4" style="margin-bottom: 1.5rem;">
+          <!-- Panel Category (15 seçenek) -->
+          <div class="form-group">
+            <label for="panel-category">Panel Category <span style="color: #ef4444;">*</span></label>
+            <select
+              id="panel-category"
+              required
+              style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;">
+              <option value="">Select category</option>
+              <option value="Energy & Resource Use">Energy &amp; Resource Use</option>
+              <option value="Climate & GHG Emissions">Climate &amp; GHG Emissions</option>
+              <option value="Water, Waste & Circularity">Water, Waste &amp; Circularity</option>
+              <option value="Biodiversity & Land Use">Biodiversity &amp; Land Use</option>
+              <option value="Pollution & Air Quality">Pollution &amp; Air Quality</option>
+              <option value="Workforce & Labour Practices">Workforce &amp; Labour Practices</option>
+              <option value="Diversity, Equity & Inclusion (DEI)">Diversity, Equity &amp; Inclusion (DEI)</option>
+              <option value="Human Rights & Supply Chain">Human Rights &amp; Supply Chain</option>
+              <option value="Community & Social Impact">Community &amp; Social Impact</option>
+              <option value="Health & Safety">Health &amp; Safety</option>
+              <option value="Ethics, Compliance & Anti-Corruption">Ethics, Compliance &amp; Anti-Corruption</option>
+              <option value="Risk Management & Resilience">Risk Management &amp; Resilience</option>
+              <option value="Data Privacy & Cybersecurity">Data Privacy &amp; Cybersecurity</option>
+              <option value="Product Responsibility & Quality">Product Responsibility &amp; Quality</option>
+              <option value="ESG Strategy, Materiality & Innovation">ESG Strategy, Materiality &amp; Innovation</option>
+            </select>
+          </div>
+
+          <!-- Impact -->
+          <div class="form-group">
+            <label for="panel-impact">Impact <span style="color: #ef4444;">*</span></label>
+            <select
+              id="panel-impact"
+              required
+              style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;">
+              <option value="">Select impact level</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Foundational">Foundational</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="panel-description">Description</label>
+          <textarea
+            id="panel-description"
+            rows="3"
+            style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical;"
+            placeholder="Short description of what this panel covers."></textarea>
+        </div>
+
+        <!-- ESG Classification + Primary Framework -->
+        <div class="grid grid-cols-2 gap-4" style="margin-bottom: 1.5rem;">
+          <!-- ESG Classification -->
+          <div class="form-group">
+            <label for="panel-esg-class">ESG Classification <span style="color: #ef4444;">*</span></label>
+            <select
+              id="panel-esg-class"
+              required
+              style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;">
+              <option value="">Select classification</option>
+              <option value="Environment">Environment</option>
+              <option value="Social">Social</option>
+              <option value="Governance">Governance</option>
+            </select>
+          </div>
+
+          <!-- Primary Framework -->
+          <div class="form-group">
+            <label for="panel-primary-framework">Primary Framework <span style="color: #ef4444;">*</span></label>
+            <select
+              id="panel-primary-framework"
+              required
+              style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;">
+              <option value="">Select framework</option>
+              <option value="GRI">GRI</option>
+              <option value="ESRS">ESRS</option>
+              <option value="SASB">SASB</option>
+              <option value="SME Hub">SME Hub</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Related SDGs (multi-select) -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="panel-sdgs">Related SDGs</label>
+          <select
+            id="panel-sdgs"
+            multiple
+            size="6"
+            style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.95rem; font-family: inherit;">
+            <option value="SDG 1 – No Poverty">SDG 1 – No Poverty</option>
+            <option value="SDG 2 – Zero Hunger">SDG 2 – Zero Hunger</option>
+            <option value="SDG 3 – Good Health and Well-Being">SDG 3 – Good Health and Well-Being</option>
+            <option value="SDG 4 – Quality Education">SDG 4 – Quality Education</option>
+            <option value="SDG 5 – Gender Equality">SDG 5 – Gender Equality</option>
+            <option value="SDG 6 – Clean Water and Sanitation">SDG 6 – Clean Water and Sanitation</option>
+            <option value="SDG 7 – Affordable and Clean Energy">SDG 7 – Affordable and Clean Energy</option>
+            <option value="SDG 8 – Decent Work and Economic Growth">SDG 8 – Decent Work and Economic Growth</option>
+            <option value="SDG 9 – Industry, Innovation and Infrastructure">SDG 9 – Industry, Innovation and Infrastructure</option>
+            <option value="SDG 10 – Reduced Inequalities">SDG 10 – Reduced Inequalities</option>
+            <option value="SDG 11 – Sustainable Cities and Communities">SDG 11 – Sustainable Cities and Communities</option>
+            <option value="SDG 12 – Responsible Consumption and Production">SDG 12 – Responsible Consumption and Production</option>
+            <option value="SDG 13 – Climate Action">SDG 13 – Climate Action</option>
+            <option value="SDG 14 – Life Below Water">SDG 14 – Life Below Water</option>
+            <option value="SDG 15 – Life on Land">SDG 15 – Life on Land</option>
+            <option value="SDG 16 – Peace, Justice and Strong Institutions">SDG 16 – Peace, Justice and Strong Institutions</option>
+            <option value="SDG 17 – Partnerships for the Goals">SDG 17 – Partnerships for the Goals</option>
+          </select>
+          <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #6b7280;">
+            Hold <strong>Cmd (Mac)</strong> or <strong>Ctrl (Windows)</strong> to select multiple SDGs.
+          </p>
+        </div>
+
+        <!-- Purpose -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label for="panel-purpose">Purpose</label>
+          <textarea
+            id="panel-purpose"
+            rows="2"
+            style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical;"
+            placeholder="Panel purpose or intended use."></textarea>
+        </div>
+
+        <!-- Unicode + Icon -->
+        <div class="grid grid-cols-2 gap-4" style="margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label for="panel-unicode">Unicode (optional)</label>
+            <input
+              type="text"
+              id="panel-unicode"
+              style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+              placeholder="e.g., U+1F30D">
+          </div>
+          <div class="form-group">
+            <label for="panel-icon">Icon (Emoji or Unicode)</label>
+            <input
+              type="text"
+              id="panel-icon"
+              style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+              placeholder="e.g., 🌍">
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-4">
+          <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem 1.5rem;">Save Panel</button>
+          <button type="button" id="cancel-panel-form" class="btn-secondary" style="flex: 1; padding: 0.75rem 1.5rem;">Cancel</button>
+        </div>
+      </form>
+  </div>
+</div>
+
+  <div id="panel-form-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="panel-form-title">Add Panel</h2>
+        <button id="close-panel-form-modal" class="modal-close">&times;</button>
+      </div>
+      <form id="panel-form">
+  <input type="hidden" id="panel-form-id" value="">
+
+  <!-- Panel Title -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-title">
+      Panel Title <span style="color: #ef4444;">*</span>
+    </label>
+    <input
+      type="text"
+      id="panel-title"
+      required
+      placeholder="e.g. Energy & Resource Efficiency"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+  </div>
+
+  <!-- Panel Domain (NEW) -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-domain">
+      Panel Domain
+    </label>
+    <select
+      id="panel-domain"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select domain</option>
+      <option value="energy_resource_use">Energy &amp; Resource Use</option>
+      <option value="climate_ghg">Climate &amp; GHG Emissions</option>
+      <option value="water_waste_circularity">Water, Waste &amp; Circularity</option>
+      <option value="biodiversity_land_use">Biodiversity &amp; Land Use</option>
+      <option value="pollution_air_quality">Pollution &amp; Air Quality</option>
+      <option value="workforce_labour">Workforce &amp; Labour Practices</option>
+      <option value="dei">Diversity, Equity &amp; Inclusion (DEI)</option>
+      <option value="human_rights_supply_chain">Human Rights &amp; Supply Chain</option>
+      <option value="community_social_impact">Community &amp; Social Impact</option>
+      <option value="health_safety">Health &amp; Safety</option>
+      <option value="ethics_compliance">Ethics, Compliance &amp; Anti-Corruption</option>
+      <option value="risk_management_resilience">Risk Management &amp; Resilience</option>
+      <option value="data_privacy_cybersecurity">Data Privacy &amp; Cybersecurity</option>
+      <option value="product_responsibility_quality">Product Responsibility &amp; Quality</option>
+      <option value="esg_strategy_innovation">ESG Strategy, Materiality &amp; Innovation</option>
+    </select>
+  </div>
+
+  <!-- ESG Classification (EXISTING CATEGORY FIELD) -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-category">
+      ESG Classification <span style="color: #ef4444;">*</span>
+    </label>
+    <select
+      id="panel-category"
+      required
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select classification</option>
+      <option value="environmental">Environment</option>
+      <option value="social">Social</option>
+      <option value="governance">Governance</option>
+    </select>
+  </div>
+
+  <!-- Impact Level (NEW) -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-impact">
+      Impact Level
+    </label>
+    <select
+      id="panel-impact"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select impact level</option>
+      <option value="high">High impact</option>
+      <option value="medium">Medium impact</option>
+      <option value="foundational">Foundational</option>
+    </select>
+  </div>
+
+  <!-- Primary Framework (NEW) -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-framework">
+      Primary Framework
+    </label>
+    <select
+      id="panel-framework"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select framework</option>
+      <option value="gri">GRI</option>
+      <option value="esrs">ESRS</option>
+      <option value="sasb">SASB</option>
+      <option value="sme_hub">SME Hub</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <!-- Description -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-description">Description</label>
+    <textarea
+      id="panel-description"
+      rows="3"
+      placeholder="Short description of what this panel covers and why it matters for SMEs."
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical;"
+    ></textarea>
+  </div>
+
+  <!-- Purpose -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-purpose">Purpose</label>
+    <textarea
+      id="panel-purpose"
+      rows="2"
+      placeholder="What type of sustainability decisions or reporting does this panel support?"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical;"
+    ></textarea>
+  </div>
+
+  <!-- Unicode / Icon -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="panel-icon">Icon (Emoji or Unicode)</label>
+    <input
+      type="text"
+      id="panel-icon"
+      placeholder="e.g. 🌍  or  U+1F30D"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+  </div>
+
+  <!-- Buttons -->
+  <div class="flex gap-4">
+    <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem 1.5rem;">
+      Save Panel
+    </button>
+    <button
+      type="button"
+      id="cancel-panel-form"
+      class="btn-secondary"
+      style="flex: 1; padding: 0.75rem 1.5rem;"
+    >
+      Cancel
+    </button>
+  </div>
+</form>
+
+    </div>
+  </div>
+    </div>
+  </div>
+
+  <!-- Add Indicators to Panel Modal -->
+  <div id="add-indicators-to-panel-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="add-indicators-modal-title">Add Indicators to Panel</h2>
+        <button id="close-add-indicators-modal" class="modal-close">&times;</button>
+      </div>
+      <div id="add-indicators-panel-info" style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f0f9ff; border-radius: 0.375rem;">
+        <p style="margin: 0; font-weight: 500;" id="add-indicators-panel-name"></p>
+      </div>
+      <div style="margin-bottom: 1.5rem;">
+        <div class="flex justify-between items-center mb-4">
+          <p class="text-gray">Select indicators to add to this panel:</p>
+          <div class="flex gap-2">
+            <button id="select-all-indicators-btn" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Select All</button>
+            <button id="deselect-all-indicators-btn" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Deselect All</button>
+          </div>
+        </div>
+        <div id="indicators-selection-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 1rem;">
+          <div class="empty-state">
+            <div class="empty-state-icon">⏳</div>
+            <p>Loading indicators...</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <button id="add-indicators-submit-btn" class="btn-primary" style="flex: 1; padding: 0.75rem 1.5rem;">Add Selected Indicators</button>
+        <button id="cancel-add-indicators-btn" class="btn-secondary" style="flex: 1; padding: 0.75rem 1.5rem;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicator Form Modal -->
+  <div id="indicator-form-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="indicator-form-title">Add Indicator</h2>
+        <button id="close-indicator-form-modal" class="modal-close">&times;</button>
+      </div>
+      <form id="indicator-form">
+  <input type="hidden" id="indicator-form-id" value="">
+
+  <!-- 1. Indicator Title -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-title">
+      Indicator Title <span style="color: #ef4444;">*</span>
+    </label>
+    <input
+      type="text"
+      id="indicator-title"
+      required
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+      placeholder="e.g., Scope 1 GHG Emissions (Tonnes CO₂e)"
+    >
+  </div>
+
+  <!-- 2. Indicator Code -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-code">Indicator Code</label>
+    <input
+      type="text"
+      id="indicator-code"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+      placeholder="e.g., GRI 305-1, ESRS E1-1, SASB RT-CH-110a.1"
+    >
+  </div>
+
+  <!-- 3. Primary Framework (bu, JS'in kullandığı eski indicator-frameworks alanı) -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-frameworks">Primary Framework</label>
+    <select
+      id="indicator-frameworks"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select framework</option>
+      <option value="GRI">GRI</option>
+      <option value="ESRS">ESRS</option>
+      <option value="SASB">SASB</option>
+      <option value="SME Hub">SME Hub</option>
+      <option value="Other">Other</option>
+    </select>
+  </div>
+
+  <!-- 4. Framework Version -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-framework-version">Framework Version</label>
+    <input
+      type="text"
+      id="indicator-framework-version"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+      placeholder="e.g., 2021 Update"
+    >
+  </div>
+
+  <!-- 5. Description -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-description">Description</label>
+    <textarea
+      id="indicator-description"
+      rows="3"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical;"
+      placeholder="Short description of what this indicator measures."
+    ></textarea>
+  </div>
+
+  <!-- 6. Why It Matters to SMEs -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-why-smes">Why It Matters to SMEs</label>
+    <textarea
+      id="indicator-why-smes"
+      rows="3"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical;"
+      placeholder="Explain why this indicator is important for SMEs and how it supports their sustainability journey."
+    ></textarea>
+  </div>
+
+  <!-- 7. Impact Level -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-impact-level">Impact Level</label>
+    <select
+      id="indicator-impact-level"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select impact level</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Foundational">Foundational</option>
+    </select>
+  </div>
+
+  <!-- 8. Difficulty Level -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-difficulty">Difficulty Level</label>
+    <select
+      id="indicator-difficulty"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select how difficult it is for SMEs to report on this indicator</option>
+      <option value="Easy">Easy</option>
+      <option value="Moderate">Moderate</option>
+      <option value="Complex">Complex</option>
+    </select>
+  </div>
+
+  <!-- 9. Estimated Time to Validate -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-time-to-validate">Estimated Time to Validate</label>
+    <input
+      type="text"
+      id="indicator-time-to-validate"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+      placeholder="e.g., 3–5 minutes"
+    >
+  </div>
+
+  <!-- 10. ESG Class -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-esg-class">ESG Class</label>
+    <select
+      id="indicator-esg-class"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Select ESG classification</option>
+      <option value="Environment">Environment</option>
+      <option value="Social">Social</option>
+      <option value="Governance">Governance</option>
+    </select>
+  </div>
+
+  <!-- 11. Related SDG(s) -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-sdgs">Related SDG(s)</label>
+    <select
+      id="indicator-sdgs"
+      multiple
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; height: 7.5rem;"
+    >
+      <option value="SDG 1 – No Poverty">SDG 1 – No Poverty</option>
+      <option value="SDG 2 – Zero Hunger">SDG 2 – Zero Hunger</option>
+      <option value="SDG 3 – Good Health and Well-Being">SDG 3 – Good Health and Well-Being</option>
+      <option value="SDG 4 – Quality Education">SDG 4 – Quality Education</option>
+      <option value="SDG 5 – Gender Equality">SDG 5 – Gender Equality</option>
+      <option value="SDG 6 – Clean Water and Sanitation">SDG 6 – Clean Water and Sanitation</option>
+      <option value="SDG 7 – Affordable and Clean Energy">SDG 7 – Affordable and Clean Energy</option>
+      <option value="SDG 8 – Decent Work and Economic Growth">SDG 8 – Decent Work and Economic Growth</option>
+      <option value="SDG 9 – Industry, Innovation and Infrastructure">SDG 9 – Industry, Innovation and Infrastructure</option>
+      <option value="SDG 10 – Reduced Inequalities">SDG 10 – Reduced Inequalities</option>
+      <option value="SDG 11 – Sustainable Cities and Communities">SDG 11 – Sustainable Cities and Communities</option>
+      <option value="SDG 12 – Responsible Consumption and Production">SDG 12 – Responsible Consumption and Production</option>
+      <option value="SDG 13 – Climate Action">SDG 13 – Climate Action</option>
+      <option value="SDG 14 – Life Below Water">SDG 14 – Life Below Water</option>
+      <option value="SDG 15 – Life on Land">SDG 15 – Life on Land</option>
+      <option value="SDG 16 – Peace, Justice and Strong Institutions">SDG 16 – Peace, Justice and Strong Institutions</option>
+      <option value="SDG 17 – Partnerships for the Goals">SDG 17 – Partnerships for the Goals</option>
+    </select>
+  </div>
+
+  <!-- 12. Indicator Validation Question -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-validation-question">Indicator Validation Question</label>
+    <textarea
+      id="indicator-validation-question"
+      rows="3"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical;"
+      placeholder="Enter the question the ESG Champion must answer to validate this indicator."
+    ></textarea>
+  </div>
+
+  <!-- 13. Response Type -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-response-type">Response Type</label>
+    <select
+      id="indicator-response-type"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+    >
+      <option value="">Choose the response format</option>
+      <option value="Multiple Choice">Multiple Choice</option>
+      <option value="Yes–No">Yes–No</option>
+      <option value="Short Text">Short Text</option>
+      <option value="Long Text">Long Text</option>
+    </select>
+  </div>
+
+  <!-- 14. Indicator Tags -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-tags">Indicator Tags (Optional)</label>
+    <input
+      type="text"
+      id="indicator-tags"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+      placeholder="e.g., emissions, water use, SME reporting, data availability…"
+    >
+  </div>
+
+  <!-- 15. Icon / Unicode -->
+  <div class="form-group" style="margin-bottom: 1.5rem;">
+    <label for="indicator-icon">Icon / Unicode (Optional)</label>
+    <input
+      type="text"
+      id="indicator-icon"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit;"
+      placeholder="Select icon or enter Unicode character"
+    >
+  </div>
+
+  <!-- Eski butonlar aynen kalsın -->
+  <div class="flex gap-4">
+    <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem 1.5rem;">Save Indicator</button>
+    <button type="button" id="cancel-indicator-form" class="btn-secondary" style="flex: 1; padding: 0.75rem 1.5rem;">Cancel</button>
+  </div>
+</form>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-service.js"></script>
+  <script src="admin-service.js"></script>
+  <script src="admin-review.js"></script>
+  <script src="admin-management.js"></script>
+  <script src="mobile-menu.js"></script>
+  <script src="dynamic-navigation.js"></script>
+  <script src="logout.js"></script>
+  <script>
+    // Close modals when clicking outside
+    document.addEventListener('DOMContentLoaded', () => {
+      const modals = ['panel-form-modal', 'indicator-form-modal', 'add-indicators-to-panel-modal', 'add-indicators-success-modal'];
+      modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target.id === modalId) {
+              modal.classList.add('hidden');
+            }
+          });
+        }
+      });
+    });
+    
+    </script>
+
+  <!-- Supabase + Services -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-service.js"></script>
+  <script src="admin-service.js"></script>
+  <script src="admin-review.js"></script>
+  <script src="admin-management.js"></script>
+  <script src="mobile-menu.js"></script>
+  <script src="dynamic-navigation.js"></script>
+  <script src="logout.js"></script>
+
+  <!-- Panel Form Fix (Save Panel çalışmayan buton düzeltildi) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const panelForm = document.getElementById('panel-form');
+      if (!panelForm) return;
+
+      panelForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formId = document.getElementById('panel-form-id').value;
+        const title = document.getElementById('panel-title').value.trim();
+        const category = document.getElementById('panel-category').value;
+        const description = document.getElementById('panel-description').value.trim();
+        const purpose = document.getElementById('panel-purpose').value.trim();
+        const icon = document.getElementById('panel-icon').value.trim();
+
+        if (!title || !category) {
+          alert('Please fill in all required fields');
+          return;
+        }
+
+        const panelData = { title, category, description, purpose, icon };
+
+        try {
+          if (formId) {
+            await AdminService.updatePanel(formId, panelData);
+            alert('Panel updated successfully!');
+          } else {
+            await AdminService.createPanel(panelData);
+            alert('Panel created successfully!');
+          }
+
+          const modal = document.getElementById('panel-form-modal');
+          if (modal) modal.classList.add('hidden');
+
+          panelForm.reset();
+          document.getElementById('panel-form-id').value = '';
+
+          if (typeof loadPanels === 'function') {
+            await loadPanels();
+          } else {
+            window.location.reload();
+          }
+        } catch (err) {
+          console.error('Error saving panel:', err);
+          alert('Error saving panel: ' + (err.message || err));
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
+
+

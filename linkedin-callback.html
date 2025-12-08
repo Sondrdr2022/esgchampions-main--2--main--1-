@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkedIn Authentication</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f9fafb;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    .spinner {
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #0D4D6C;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    p {
+      color: #6b7280;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="spinner"></div>
+    <p>Completing LinkedIn authentication...</p>
+  </div>
+
+  <!-- Supabase Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    (async () => {
+      try {
+        // Check for error in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        
+        const error = urlParams.get('error') || hashParams.get('error');
+        const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+
+        if (error) {
+          // Send error to parent window
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'LINKEDIN_OAUTH_ERROR',
+              error: errorDescription || error
+            }, window.location.origin);
+          } else {
+            // If no opener, redirect to login with error
+            window.location.href = `champion-login.html?error=${encodeURIComponent(error)}`;
+          }
+          setTimeout(() => window.close(), 1000);
+          return;
+        }
+
+        // Try to get session from hash (Supabase OAuth callback)
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        
+        if (accessToken) {
+          // Set the session in Supabase
+          const { data, error: sessionError } = await supabaseClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || ''
+          });
+
+          if (sessionError) {
+            throw sessionError;
+          }
+
+          // Send success message to parent window
+          if (window.opener) {
+            window.opener.postMessage({
+              type: 'LINKEDIN_OAUTH_SUCCESS',
+              session: data.session
+            }, window.location.origin);
+          } else {
+            // If no opener, redirect to dashboard
+            window.location.href = 'champion-dashboard.html';
+          }
+
+          // Close popup after a short delay
+          setTimeout(() => {
+            if (window.opener) {
+              window.close();
+            }
+          }, 500);
+        } else {
+          // Try to get code from URL (PKCE flow)
+          const code = urlParams.get('code') || hashParams.get('code');
+
+          if (code) {
+            // Exchange code for session
+            const { data, error: exchangeError } = await supabaseClient.auth.exchangeCodeForSession(code);
+
+            if (exchangeError) {
+              throw exchangeError;
+            }
+
+            if (window.opener) {
+              window.opener.postMessage({
+                type: 'LINKEDIN_OAUTH_SUCCESS',
+                session: data.session
+              }, window.location.origin);
+            } else {
+              window.location.href = 'champion-dashboard.html';
+            }
+
+            setTimeout(() => {
+              if (window.opener) {
+                window.close();
+              }
+            }, 500);
+          } else {
+            // Wait a bit for Supabase to process (sometimes there's a delay)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Try to get session
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+            
+            if (session && !sessionError) {
+              if (window.opener) {
+                window.opener.postMessage({
+                  type: 'LINKEDIN_OAUTH_SUCCESS',
+                  session: session
+                }, window.location.origin);
+                setTimeout(() => window.close(), 500);
+              } else {
+                window.location.href = 'champion-dashboard.html';
+              }
+            } else {
+              throw new Error('No authentication data found in callback');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('LinkedIn callback error:', error);
+        
+        // Send error to parent window
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'LINKEDIN_OAUTH_ERROR',
+            error: error.message || 'Authentication failed'
+          }, window.location.origin);
+        } else {
+          // If no opener, redirect to login with error
+          window.location.href = `champion-login.html?error=${encodeURIComponent(error.message || 'Authentication failed')}`;
+        }
+
+        // Show error message
+        document.querySelector('.container').innerHTML = `
+          <div style="color: #ef4444; margin-bottom: 1rem; font-size: 2rem;">❌</div>
+          <p style="color: #ef4444; font-weight: 500;">Authentication failed</p>
+          <p style="color: #6b7280; font-size: 0.875rem; margin-top: 0.5rem;">${error.message || 'Please try again.'}</p>
+          <p style="color: #6b7280; font-size: 0.75rem; margin-top: 1rem;">This window will close automatically.</p>
+        `;
+
+        setTimeout(() => {
+          if (window.opener) {
+            window.close();
+          } else {
+            window.location.href = 'champion-login.html';
+          }
+        }, 3000);
+      }
+    })();
+  </script>
+</body>
+</html>
+
