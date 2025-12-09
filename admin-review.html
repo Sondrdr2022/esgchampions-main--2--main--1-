@@ -221,6 +221,12 @@
           Manage reviews, panels, and indicators
         </p>
       </div>
+      <!-- Download Excel Button -->
+      <div style="text-align: right; margin-bottom: 2rem;">
+        <button id="download-excel-btn" class="btn-primary" style="padding: 0.75rem 1.5rem;">
+          ⬇️ Download All Data (Excel)
+        </button>
+      </div>
 
       <!-- Tabs -->
       <div class="filter-bar" style="padding: 0; border: none; background: transparent;">
@@ -804,8 +810,33 @@
         <button id="close-indicator-form-modal" class="modal-close">&times;</button>
       </div>
       <form id="indicator-form">
-  <input type="hidden" id="indicator-form-id" value="">
+        <!-- Place inside the form#indicator-form, near the top -->
+<div class="form-group" style="margin-bottom: 1.5rem;">
+  <label for="indicator-panel">Panel <span style="color: #ef4444;">*</span></label>
+  <select
+    id="indicator-panel"
+    required
+    style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+    <option value="">Select panel</option>
+    <!-- Options will be populated by loadPanelsForIndicatorForm() -->
+  </select>
+</div>
 
+<div class="grid grid-cols-2 gap-4" style="margin-bottom: 1.5rem;">
+  <div class="form-group">
+    <label for="indicator-unit">Unit</label>
+    <input
+      type="text"
+      id="indicator-unit"
+      style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;"
+      placeholder="e.g., tCO2e, kWh">
+  </div>
+  <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+    <input type="checkbox" id="indicator-formula-required" style="width: 1.25rem; height: 1.25rem;">
+    <label for="indicator-formula-required">Formula Required</label>
+  </div>
+</div>
+  <input type="hidden" id="indicator-form-id" value="">
   <!-- 1. Indicator Title -->
   <div class="form-group" style="margin-bottom: 1.5rem;">
     <label for="indicator-title">
@@ -1020,6 +1051,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="supabase-service.js"></script>
@@ -1045,7 +1077,7 @@
       });
     });
     
-    </script>
+     </script>
 
   <!-- Supabase + Services -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1058,52 +1090,55 @@
   <script src="dynamic-navigation.js"></script>
   <script src="logout.js"></script>
 
-  <!-- Panel Form Fix (Save Panel çalışmayan buton düzeltildi) -->
+  <!-- Excel Download Script -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const panelForm = document.getElementById('panel-form');
-      if (!panelForm) return;
+      const btn = document.getElementById('download-excel-btn');
+      if (!btn) return;
 
-      panelForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formId = document.getElementById('panel-form-id').value;
-        const title = document.getElementById('panel-title').value.trim();
-        const category = document.getElementById('panel-category').value;
-        const description = document.getElementById('panel-description').value.trim();
-        const purpose = document.getElementById('panel-purpose').value.trim();
-        const icon = document.getElementById('panel-icon').value.trim();
-
-        if (!title || !category) {
-          alert('Please fill in all required fields');
-          return;
-        }
-
-        const panelData = { title, category, description, purpose, icon };
-
+      btn.addEventListener('click', async () => {
         try {
-          if (formId) {
-            await AdminService.updatePanel(formId, panelData);
-            alert('Panel updated successfully!');
-          } else {
-            await AdminService.createPanel(panelData);
-            alert('Panel created successfully!');
-          }
+          // Step 1: Gather all tables to download
+         const [
+            reviews,
+            panels,
+            indicators,
+            champions,
+            votes,
+            comments
+          ] = await Promise.all([
+            supabaseClient.from('reviews').select('*'),
+            supabaseClient.from('panels').select('*'),
+            supabaseClient.from('indicators').select('*'),
+            supabaseClient.from('champions').select('*'),
+            supabaseClient.from('votes').select('*'),
+            supabaseClient.from('comments').select('*')
+          ]);
 
-          const modal = document.getElementById('panel-form-modal');
-          if (modal) modal.classList.add('hidden');
+          // Helper to flatten returned data
+         function flatData(resp) { return resp.data || []; }
 
-          panelForm.reset();
-          document.getElementById('panel-form-id').value = '';
+          // Step 2: Compose workbook
+          const wb = XLSX.utils.book_new();
+          wb.Props = {
+            Title: "STIF Supabase Export",
+            Author: "STIF Dashboard",
+            CreatedDate: new Date()
+          };
 
-          if (typeof loadPanels === 'function') {
-            await loadPanels();
-          } else {
-            window.location.reload();
-          }
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(reviews)), "Reviews");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(panels)), "Panels");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(indicators)), "Indicators");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(champions)), "Champions");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(votes)), "Votes");
+          XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(comments)), "Comments");
+
+          // Step 3: Download
+          XLSX.writeFile(wb, `stif-supabase-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+
         } catch (err) {
-          console.error('Error saving panel:', err);
-          alert('Error saving panel: ' + (err.message || err));
+          console.error('Error exporting to Excel:', err);
+          alert('Error exporting data: ' + (err.message || err));
         }
       });
     });

@@ -399,5 +399,55 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initial load
   await loadReviews();
   await updateStats();
+
+  // ----------- Download Excel Functionality -------------
+  const downloadExcelBtn = document.getElementById('download-excel-btn');
+  if (downloadExcelBtn) {
+    downloadExcelBtn.addEventListener('click', async () => {
+      try {
+        // Step 1: Gather all tables to download
+        const [
+          reviews,
+          panels,
+          indicators,
+          champions,
+          votes,
+          comments
+        ] = await Promise.all([
+          supabaseClient.from('reviews').select('*'),
+          supabaseClient.from('panels').select('*'),
+          supabaseClient.from('indicators').select('*'),
+          supabaseClient.from('champions').select('*'),
+          supabaseClient.from('votes').select('*'),
+          supabaseClient.from('comments').select('*')
+        ]);
+
+        // Helper to flatten returned data
+        function flatData(resp) { return resp.data || []; }
+
+        // Step 2: Compose workbook
+        const wb = XLSX.utils.book_new();
+        wb.Props = {
+          Title: "STIF Supabase Export",
+          Author: "STIF Dashboard",
+          CreatedDate: new Date()
+        };
+
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(reviews)), "Reviews");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(panels)), "Panels");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(indicators)), "Indicators");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(champions)), "Champions");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(votes)), "Votes");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flatData(comments)), "Comments");
+
+        // Step 3: Download
+        XLSX.writeFile(wb, `stif-supabase-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+
+      } catch (err) {
+        console.error('Error exporting to Excel:', err);
+        alert('Error exporting data: ' + (err.message || err));
+      }
+    });
+  }
 });
 
