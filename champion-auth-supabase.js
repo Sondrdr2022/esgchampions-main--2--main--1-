@@ -1,8 +1,39 @@
 // Champion Authentication System with Supabase
 // This replaces champion-auth.js functionality with Supabase
 
+// Handle email confirmation callback
+async function handleEmailConfirmation() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const verified = urlParams.get('verified');
+  const email = urlParams.get('email');
+  
+  if (verified === 'true') {
+    try {
+      // Show success message
+      const messageContainer = document.getElementById('email-confirmation-message');
+      if (messageContainer) {
+        messageContainer.innerHTML = `
+          <div class="alert alert-success">
+            <h4>Email Confirmed Successfully!</h4>
+            <p>Your email ${email ? `(${email})` : ''} has been verified. You can now log in to your account.</p>
+          </div>
+        `;
+        messageContainer.style.display = 'block';
+      }
+      
+      // Clean URL
+      const cleanUrl = window.location.pathname + (email ? `?email=${encodeURIComponent(email)}` : '');
+      window.history.replaceState({}, document.title, cleanUrl);
+      
+      console.log('Email confirmed for:', email);
+    } catch (error) {
+      console.error('Email confirmation handling error:', error);
+    }
+  }
+}
+
 // Handle OAuth callback on page load
-document.addEventListener('DOMContentLoaded', async () => {
+async function handleOAuthCallback() {
   // Check if this is an OAuth callback
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
@@ -30,6 +61,41 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }
+}
+
+// Check if email already exists (for registration)
+async function checkEmailExists(email) {
+  try {
+    // First check if email exists in auth system
+    const { data: { users }, error: authError } = await supabaseClient.auth.admin.listUsers();
+    
+    if (!authError && users) {
+      const userExists = users.some(u => u.email === email);
+      if (userExists) {
+        // Check if email is confirmed
+        const user = users.find(u => u.email === email);
+        if (user?.email_confirmed_at) {
+          return { exists: true, confirmed: true, user: user };
+        } else {
+          return { exists: true, confirmed: false, user: user };
+        }
+      }
+    }
+    
+    return { exists: false, confirmed: false, user: null };
+  } catch (error) {
+    console.error('Error checking email:', error);
+    return { exists: false, confirmed: false, user: null };
+  }
+}
+
+// Initialize authentication system
+document.addEventListener('DOMContentLoaded', async () => {
+  // Handle email confirmation first
+  await handleEmailConfirmation();
+  
+  // Handle OAuth callback
+  await handleOAuthCallback();
 
   // Password toggle functionality
   const passwordToggles = document.querySelectorAll('.password-toggle');
@@ -47,9 +113,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  // Resend confirmation email functionality
+  const resendConfirmationBtn = document.getElementById('resend-confirmation-btn');
+  if (resendConfirmationBtn) {
+    resendConfirmationBtn.addEventListener('click', async () => {
+      const emailInput = document.getElementById('login-email');
+      const email = emailInput ? emailInput.value.trim() : '';
+      
+      if (!email) {
+        alert('Please enter your email address first');
+        return;
+      }
+      
+      try {
+        resendConfirmationBtn.disabled = true;
+        const originalText = resendConfirmationBtn.textContent;
+        resendConfirmationBtn.textContent = 'Sending...';
+        
+        await SupabaseService.resendConfirmationEmail(email);
+        
+        alert('Confirmation email sent! Please check your inbox and spam folder.');
+        resendConfirmationBtn.disabled = false;
+        resendConfirmationBtn.textContent = originalText;
+      } catch (error) {
+        console.error('Resend confirmation error:', error);
+        alert(error.message || 'Failed to resend confirmation email. Please try again.');
+        resendConfirmationBtn.disabled = false;
+        resendConfirmationBtn.textContent = originalText;
+      }
+    });
+  }
+
   // Login form
   const loginForm = document.getElementById('champion-login-form');
   if (loginForm) {
+    // Pre-fill email if provided in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('email');
+    if (emailParam) {
+      const emailInput = document.getElementById('login-email');
+      if (emailInput) {
+        emailInput.value = decodeURIComponent(emailParam);
+      }
+    }
+
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('login-email').value.trim();
@@ -69,6 +176,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         console.log('Attempting login for:', email);
 
+        // First check if email is confirmed
+        const emailCheck = await checkEmailExists(email);
+        if (emailCheck.exists && !emailCheck.confirmed) {
+          // Email exists but not confirmed
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+          
+          const resend = confirm('Your email has not been confirmed yet. Would you like us to resend the confirmation email?');
+          if (resend) {
+            try {
+              await SupabaseService.resendConfirmationEmail(email);
+              alert('Confirmation email resent! Please check your inbox and confirm your email before logging in.');
+            } catch (resendError) {
+              alert('Failed to resend confirmation email. Please try again or contact support.');
+            }
+          }
+          return;
+        }
+
         // Sign in with Supabase
         const { data, error } = await SupabaseService.signIn(email, password);
 
@@ -77,14 +203,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           
           // Provide more specific error messages
           if (error.message.includes('Invalid login credentials')) {
-            // Check if user exists in auth but not in champions table
-            const { data: authUsers } = await supabaseClient.auth.admin.listUsers();
-            const userExists = authUsers?.users?.some(u => u.email === email);
-            
-            if (userExists) {
-              alert('Invalid login credentials. Your account exists but may not be fully set up. Please contact support or try registering again.');
-            } else {
-              alert('Invalid login credentials. Please check your email and password, or register a new account.');
+            alert('Invalid email or password. Please check your credentials.');
+          } else if (error.message.includes('Email not confirmed')) {
+            const resend = confirm('Your email has not been confirmed yet. Would you like us to resend the confirmation email?');
+            if (resend) {
+              try {
+                await SupabaseService.resendConfirmationEmail(email);
+                alert('Confirmation email resent! Please check your inbox and confirm your email before logging in.');
+              } catch (resendError) {
+                alert('Failed to resend confirmation email. Please try again or contact support.');
+              }
             }
           } else {
             alert(error.message || 'Login failed. Please try again.');
@@ -102,15 +230,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (!champion) {
           console.error('Champion profile not found for user:', email);
-          alert('Your account exists but profile is incomplete. Please contact support.');
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalText;
-          return;
+          
+          // Check if we need to complete profile setup
+          const user = await SupabaseService.getCurrentUser();
+          if (user) {
+            // Get stored champion data from user metadata
+            const championData = user.user_metadata?.champion_data;
+            
+            if (championData) {
+              try {
+                // Complete profile setup
+                const parsedData = JSON.parse(championData);
+                const completedChampion = await SupabaseService.completeProfileSetup(
+                  user.id,
+                  email,
+                  parsedData
+                );
+                
+                if (completedChampion) {
+                  champion = completedChampion;
+                }
+              } catch (profileError) {
+                console.error('Profile completion error:', profileError);
+                // Continue with basic profile
+              }
+            }
+          }
+          
+          if (!champion) {
+            alert('Your account exists but profile is incomplete. Please contact support.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            return;
+          }
         }
 
         console.log('Champion profile found:', champion.email);
 
-        // Store session info in localStorage for quick access (optional)
+        // Store session info in localStorage for quick access
         localStorage.setItem('current-champion-id', champion.id);
 
         // Dispatch login event for navigation system
@@ -157,17 +314,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const originalText = linkedinLoginBtn.innerHTML;
         linkedinLoginBtn.innerHTML = '<span>Opening LinkedIn...</span>';
         
-        // IMPORTANT: use the OIDC provider key
+        // Use OAuth with redirect
         const redirectUrl = `${window.location.origin}/linkedin-callback.html`;
         await supabaseClient.auth.signInWithOAuth({
-          provider: 'linkedin_oidc',
+          provider: 'linkedin',
           options: {
             redirectTo: redirectUrl,
             scopes: 'openid profile email'
           }
         });
 
-        // If successful, Supabase will redirect; for popup flow you can rely on linkedin-callback.html
+        // If successful, Supabase will redirect to linkedin-callback.html
       } catch (error) {
         console.error('LinkedIn login error:', error);
         
@@ -186,33 +343,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Check if email already exists (redirect to login if registered)
-  async function checkEmailExists(email) {
-    try {
-      // Check if email exists in champions table
-      const { data, error } = await supabaseClient
-        .from('champions')
-        .select('email')
-        .eq('email', email)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned (email doesn't exist - this is OK)
-        console.error('Error checking email:', error);
-        return false; // Allow registration if check fails
-      }
-
-      // If data exists, email is already registered
-      return !!data;
-    } catch (error) {
-      console.error('Error checking email:', error);
-      return false; // Allow registration if check fails
-    }
-  }
-
   // Registration form (if on register page)
   const registerForm = document.getElementById('champion-register-form');
   if (registerForm) {
+    // Pre-fill email if provided in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('email');
+    if (emailParam) {
+      const emailInput = document.getElementById('champion-email');
+      if (emailInput) {
+        emailInput.value = decodeURIComponent(emailParam);
+        emailInput.readOnly = true;
+      }
+    }
+
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -265,18 +409,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         submitBtn.textContent = 'Checking email...';
 
         // Check if email already exists
-        const emailExists = await checkEmailExists(formData.email);
-        if (emailExists) {
-          alert('An account with this email already exists. Redirecting to login page...');
-          // Pre-fill email in login page
-          window.location.href = `champion-login.html?email=${encodeURIComponent(formData.email)}`;
+        const emailCheck = await checkEmailExists(formData.email);
+        if (emailCheck.exists) {
+          if (emailCheck.confirmed) {
+            alert('An account with this email already exists. Redirecting to login page...');
+            window.location.href = `champion-login.html?email=${encodeURIComponent(formData.email)}`;
+          } else {
+            const resend = confirm('An account with this email already exists but is not confirmed. Would you like us to resend the confirmation email?');
+            if (resend) {
+              try {
+                await SupabaseService.resendConfirmationEmail(formData.email);
+                alert('Confirmation email resent! Please check your inbox and confirm your email before logging in.');
+              } catch (resendError) {
+                alert('Failed to resend confirmation email. Please try again or contact support.');
+              }
+            }
+            window.location.href = `champion-login.html?email=${encodeURIComponent(formData.email)}`;
+          }
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
           return;
         }
 
         submitBtn.textContent = 'Registering...';
 
-        // Sign up with Supabase
-        const { user, champion } = await SupabaseService.signUp(
+        // Sign up with Supabase (requires email confirmation)
+        const result = await SupabaseService.signUp(
           formData.email,
           formData.password,
           {
@@ -300,14 +458,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         );
 
-        // Store session info
-        localStorage.setItem('current-champion-id', champion.id);
-
-        // Dispatch login event for navigation system
-        window.dispatchEvent(new CustomEvent('login', { detail: { champion } }));
-
-        alert('Registration successful! Redirecting to dashboard...');
-        window.location.href = 'champion-dashboard.html';
+        if (result.requiresEmailConfirmation) {
+          // Show success message and redirect to login
+          alert(result.message || 'Registration successful! Please check your email to confirm your account. After confirmation, you can log in.');
+          window.location.href = 'champion-login.html';
+          return;
+        }
+        
+        // If no email confirmation required (shouldn't happen with current setup)
+        alert('Registration successful! You can now log in.');
+        window.location.href = 'champion-login.html';
       } catch (error) {
         console.error('Registration error:', error);
         
@@ -332,4 +492,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 });
-

@@ -12,21 +12,43 @@ const SupabaseService = {
   // ============================================
 
   /**
-   * Sign up a new champion
+   * Sign up a new champion - Email confirmation required
    */
   async signUp(email, password, championData) {
     try {
       console.log('Starting sign up process for:', email);
       
-      // 1. Create auth user
+      // 1. Create auth user only - Supabase will handle email confirmation
       const { data: authData, error: authError } = await supabaseClient.auth.signUp({
         email,
         password,
         options: {
           data: {
             first_name: championData.firstName,
-            last_name: championData.lastName
-          }
+            last_name: championData.lastName,
+            // Store champion data in user metadata for later use
+            champion_data: JSON.stringify({
+              firstName: championData.firstName,
+              lastName: championData.lastName,
+              organization: championData.organization || null,
+              role: championData.role || null,
+              mobile: championData.mobile || null,
+              officePhone: championData.officePhone || null,
+              linkedin: championData.linkedin || null,
+              website: championData.website || null,
+              competence: championData.competence || null,
+              contributions: championData.contributions || null,
+              primarySector: championData.primarySector || null,
+              expertisePanels: championData.expertisePanels || null,
+              claAccepted: championData.claAccepted || false,
+              ndaAccepted: championData.ndaAccepted || false,
+              ndaSignature: championData.ndaSignature || null,
+              termsAccepted: championData.termsAccepted || false,
+              ipPolicyAccepted: championData.ipPolicyAccepted || false
+            })
+          },
+          // IMPORTANT: Don't create champion profile yet - wait for email confirmation
+          emailRedirectTo: `${window.location.origin}/champion-login.html?verified=true&email=${encodeURIComponent(email)}`
         }
       });
 
@@ -40,20 +62,38 @@ const SupabaseService = {
         throw new Error('Failed to create user account');
       }
 
-      console.log('Auth user created:', authData.user.id);
+      console.log('Auth user created, email confirmation sent to:', email);
+      
+      // IMPORTANT: We're NOT creating the champion profile here
+      // The profile will be created by a database trigger AFTER email confirmation
+      // OR the user will complete profile setup after first login
+      
+      return { 
+        user: authData.user, 
+        message: 'Registration successful! Please check your email to confirm your account. After confirmation, you can log in.',
+        requiresEmailConfirmation: true
+      };
+    } catch (error) {
+      console.error('Sign up error:', error);
+      const errorMessage = error.message || error.toString() || 'Registration failed';
+      throw new Error(errorMessage);
+    }
+  },
 
-      // Wait a moment for the trigger to potentially create the profile
-      // (if trigger is set up, it will create a basic profile)
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // 2. Create or update champion profile
+  /**
+   * Complete champion profile setup after email confirmation
+   */
+  async completeProfileSetup(championId, email, championData) {
+    try {
+      console.log('Completing profile setup for:', email);
+      
       const insertData = {
-        id: authData.user.id,
+        id: championId,
+        email: email,
         first_name: championData.firstName,
         last_name: championData.lastName,
         organization: championData.organization || null,
         role: championData.role || null,
-        email: email,
         mobile: championData.mobile || null,
         office_phone: championData.officePhone || null,
         linkedin: championData.linkedin || null,
@@ -69,20 +109,18 @@ const SupabaseService = {
         ip_policy_accepted: championData.ipPolicyAccepted || false
       };
 
-      console.log('Inserting/updating champion profile:', insertData);
+      console.log('Completing champion profile:', insertData);
 
-      // Use upsert to handle case where trigger already created a basic profile
       const { data: championProfile, error: profileError } = await supabaseClient
         .from('champions')
         .upsert(insertData, {
-          onConflict: 'id',
-          ignoreDuplicates: false
+          onConflict: 'id'
         })
         .select()
         .single();
 
       if (profileError) {
-        console.error('Champion profile insert/update error:', profileError);
+        console.error('Error completing champion profile:', profileError);
         console.error('Error details:', {
           code: profileError.code,
           message: profileError.message,
@@ -90,22 +128,14 @@ const SupabaseService = {
           hint: profileError.hint
         });
         
-        // If foreign key error, provide helpful message
-        if (profileError.message && profileError.message.includes('foreign key')) {
-          throw new Error('Registration failed: User account was not created properly. Please try again or contact support.');
-        }
-        
-        throw new Error(`Failed to create champion profile: ${profileError.message}`);
+        throw new Error(`Failed to complete profile setup: ${profileError.message}`);
       }
 
-      console.log('Champion profile created/updated successfully:', championProfile);
-
-      return { user: authData.user, champion: championProfile };
+      console.log('Champion profile completed successfully:', championProfile);
+      return championProfile;
     } catch (error) {
-      console.error('Sign up error:', error);
-      // Provide more detailed error message
-      const errorMessage = error.message || error.toString() || 'Registration failed';
-      throw new Error(errorMessage);
+      console.error('Complete profile setup error:', error);
+      throw error;
     }
   },
 
@@ -272,30 +302,7 @@ const SupabaseService = {
       // Check if champion profile exists
       let champion = await this.getCurrentChampion();
 
-      if (champion) {
-        // Update existing champion profile with LinkedIn data
-        console.log('Updating existing champion profile with LinkedIn data');
-        const updateData = {
-          email: email || champion.email,
-          linkedin: linkedinId || champion.linkedin,
-          ...(firstName && { first_name: firstName }),
-          ...(lastName && { last_name: lastName })
-        };
-
-        const { data: updatedChampion, error: updateError } = await supabaseClient
-          .from('champions')
-          .update(updateData)
-          .eq('id', session.user.id)
-          .select()
-          .single();
-
-        if (updateError) {
-          console.error('Error updating champion profile:', updateError);
-          // Continue anyway - user is authenticated
-        } else {
-          champion = updatedChampion;
-        }
-      } else {
+      if (!champion) {
         // Create new champion profile from LinkedIn data
         console.log('Creating new champion profile from LinkedIn data');
         const insertData = {
@@ -338,6 +345,41 @@ const SupabaseService = {
       return { user: session.user, champion };
     } catch (error) {
       console.error('OAuth callback error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Check if user has confirmed their email
+   */
+  async checkEmailConfirmation(email) {
+    try {
+      const { data, error } = await supabaseClient.auth.admin.listUsers();
+      
+      if (error) throw error;
+      
+      const user = data.users.find(u => u.email === email);
+      return user?.email_confirmed_at !== null;
+    } catch (error) {
+      console.error('Check email confirmation error:', error);
+      return false;
+    }
+  },
+
+  /**
+   * Resend confirmation email
+   */
+  async resendConfirmationEmail(email) {
+    try {
+      const { data, error } = await supabaseClient.auth.resend({
+        type: 'signup',
+        email: email
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Resend confirmation email error:', error);
       throw error;
     }
   },
@@ -1036,7 +1078,13 @@ const SupabaseService = {
 // Listen for auth state changes
 supabaseClient.auth.onAuthStateChange((event, session) => {
   console.log('Auth state changed:', event, session?.user?.id);
+  
   // You can dispatch custom events here if needed
-  window.dispatchEvent(new CustomEvent('supabase:auth', { detail: { event, session } }));
+  window.dispatchEvent(new CustomEvent('supabase:auth', { 
+    detail: { 
+      event, 
+      session,
+      user: session?.user 
+    } 
+  }));
 });
-
