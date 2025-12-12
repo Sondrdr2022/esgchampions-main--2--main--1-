@@ -571,15 +571,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
     }
 
-    // Handle form submission
+    // Build mailto link and open default email client
+    function openEmailClient(recipients, subject, body) {
+      // Multiple recipients separated by commas is allowed by most clients
+      const to = encodeURIComponent(recipients.join(','));
+      const encSubject = encodeURIComponent(subject);
+      const encBody = encodeURIComponent(body.replace(/\n/g, '\r\n'));
+      const mailtoUrl = `mailto:${to}?subject=${encSubject}&body=${encBody}`;
+
+      // Use window.location.href for a more universal behavior
+      window.location.href = mailtoUrl;
+    }
+
+    // Handle form submission - OPEN EMAIL CLIENT
     if (inviteForm) {
       inviteForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const emailString = inviteEmailInput?.value.trim() || '';
+        const panelTitle = document.getElementById('panel-title')?.textContent?.trim() || 'ESG Indicator';
         const message = inviteMessageInput?.value.trim() || "I'm inviting you to review an ESG indicator.\nThanks!";
-        
+
         const emailValidation = validateEmails(emailString);
-        
         if (!emailValidation.valid) {
           if (emailValidation.invalid.length > 0) {
             alert(`Please enter valid email addresses. Invalid: ${emailValidation.invalid.join(', ')}`);
@@ -588,22 +601,40 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
           return;
         }
-        
-        try {
-          // Send invitations to all emails
-          const invitationPromises = emailValidation.emails.map(email => 
-            DB.saveInvitation(currentChampion.id, email, panelId, message)
-          );
-          
-          await Promise.all(invitationPromises);
-          alert(`Invitations sent successfully to ${emailValidation.emails.length} recipient(s)!`);
-          inviteForm.reset();
-          updateInvitationPreview();
-          inviteModal.classList.add('hidden');
-        } catch (error) {
-          console.error('Error sending invitations:', error);
-          alert('Failed to send invitations. Please try again.');
+
+        // Compose subject and body
+        const subject = `Invitation to review: ${panelTitle.replace(/\s*📋\s*/g, '')}`;
+        const reviewUrl = window.location.href;
+        const body = `Hello,
+
+${message}
+
+You can review the indicator(s) here:
+${reviewUrl}
+
+Best regards,
+${currentChampion?.name || 'Champion'}`;
+
+        // Direct the user to their email client
+        openEmailClient(emailValidation.emails, subject, body);
+
+        // OPTIONAL: If you want to also record invitations server-side, set this flag to true
+        const alsoSaveToServer = false;
+        if (alsoSaveToServer) {
+          try {
+            const invitationPromises = emailValidation.emails.map(email =>
+              DB.saveInvitation(currentChampion.id, email, panelId, message)
+            );
+            await Promise.all(invitationPromises);
+          } catch (error) {
+            console.error('Error saving invitations server-side:', error);
+          }
         }
+
+        // Close and reset modal after opening email client
+        inviteForm.reset();
+        updateInvitationPreview();
+        inviteModal.classList.add('hidden');
       });
     }
 
