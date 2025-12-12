@@ -165,7 +165,7 @@ const SupabaseService = {
       try {
         // Get the OAuth URL from Supabase
         supabaseClient.auth.signInWithOAuth({
-          provider: 'linkedin',
+          provider: 'linkedin_oidc',
           options: {
             redirectTo: `${window.location.origin}/linkedin-callback.html`,
             scopes: 'openid profile email'
@@ -290,7 +290,7 @@ const SupabaseService = {
 
       // Get user metadata from LinkedIn
       const userMetadata = session.user.user_metadata || {};
-      const linkedinData = session.user.app_metadata?.provider === 'linkedin' ? userMetadata : null;
+      const linkedinData = session.user.app_metadata?.provider === 'linkedin_oidc' ? userMetadata : null;
 
       // Extract LinkedIn profile information
       const firstName = linkedinData?.first_name || userMetadata?.first_name || userMetadata?.full_name?.split(' ')[0] || '';

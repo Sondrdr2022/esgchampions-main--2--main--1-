@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Use OAuth with redirect
         const redirectUrl = `${window.location.origin}/linkedin-callback.html`;
         await supabaseClient.auth.signInWithOAuth({
-          provider: 'linkedin',
+          provider: 'linkedin_oidc',
           options: {
             redirectTo: redirectUrl,
             scopes: 'openid profile email'
