@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     // Check authentication first
-    if (!supabaseClient) {
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) {
       console.error('Supabase client not initialized');
       window.location.href = 'champion-login.html';
       return;
@@ -21,14 +21,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Get current champion (async)
     const currentChampion = await DB.getCurrentChampion();
-    
     if (!currentChampion) {
       console.error('Champion profile not found for user:', user.id);
       await supabaseClient.auth.signOut();
       window.location.href = 'champion-login.html';
       return;
     }
-
     console.log('Current champion loaded:', currentChampion);
 
     // Load champion name
@@ -47,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const [reviewsResult, votesResult, commentsResult] = await Promise.all([
           supabaseClient
             .from('reviews')
-            .select('id, status')
+            .select('id, status, created_at')
             .eq('champion_id', currentChampion.id),
           supabaseClient
             .from('votes')
@@ -70,27 +68,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Comments: 3 points each
         const acceptedReviews = reviews.filter(r => r.status === 'accepted').length;
         const pendingReviews = reviews.filter(r => r.status === 'pending').length;
-        
+
         const score = (acceptedReviews * 10) + (pendingReviews * 5) + (votes.length * 2) + (comments.length * 3);
         const normalizedScore = Math.min(100, Math.round(score / 2)); // Normalize to 0-100
 
-        // Calculate improvement (compare with previous week)
+        // Calculate improvement (compare with activity prior to one week ago)
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        
-        const [oldReviewsResult] = await Promise.all([
-          supabaseClient
-            .from('reviews')
-            .select('id, status')
-            .eq('champion_id', currentChampion.id)
-            .lt('created_at', oneWeekAgo.toISOString())
-        ]);
 
-        const oldReviews = oldReviewsResult.data || [];
-        const oldAccepted = oldReviews.filter(r => r.status === 'accepted').length;
-        const oldScore = (oldAccepted * 10) + (oldReviews.length * 5);
+        const { data: oldReviews, error: oldErr } = await supabaseClient
+          .from('reviews')
+          .select('id, status, created_at')
+          .eq('champion_id', currentChampion.id)
+          .lt('created_at', oneWeekAgo.toISOString());
+
+        if (oldErr) {
+          console.warn('Old reviews fetch error (improvement will be zero):', oldErr.message);
+        }
+
+        const oldAccepted = (oldReviews || []).filter(r => r.status === 'accepted').length;
+        const oldScore = (oldAccepted * 10) + ((oldReviews || []).length * 5);
         const oldNormalizedScore = Math.min(100, Math.round(oldScore / 2));
-        
         const improvement = normalizedScore - oldNormalizedScore;
 
         return { score: normalizedScore, improvement };
@@ -101,8 +99,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const { score, improvement } = await calculateSTIFScore();
-    const scoreEl = document.getElementById('stif-score');
-    if (scoreEl) scoreEl.textContent = score;
+
+    // Update visible score; champion-dashboard.html uses id="stif-score-number"
+    const scoreNumberEl = document.getElementById('stif-score-number');
+    if (scoreNumberEl) {
+      scoreNumberEl.textContent = String(score);
+    } else {
+      // Fallback for older markup
+      const scoreEl = document.getElementById('stif-score');
+      if (scoreEl) scoreEl.textContent = String(score);
+      console.warn('STIF score element #stif-score-number not found; used fallback if available.');
+    }
+
+    // Optional improvement display if present
     const improvementEl = document.getElementById('stif-score-improvement');
     if (improvementEl) {
       improvementEl.textContent = improvement >= 0 ? `+${improvement}` : `${improvement}`;
@@ -112,7 +121,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     // CONTINUE WHERE YOU LEFT OFF
     // ============================================
     async function loadLastActivity() {
+      const continueBtn = document.getElementById('continue-where-left-btn');
+      const continueBtnText = document.getElementById('continue-btn-text');
+
+      // Defensive: ensure a safe default behavior
+      function setDefaultContinue() {
+        if (continueBtnText) {
+          continueBtnText.textContent = 'Continue where you left off';
+        }
+        if (continueBtn) {
+          continueBtn.onclick = () => {
+            window.location.href = 'champion-panels.html';
+          };
+        }
+      }
+
       try {
+        if (!continueBtn) {
+          console.warn('Continue button #continue-where-left-btn not found in DOM.');
+          return; // no button present, nothing to wire
+        }
+
         // Get last active panel and indicator from database
         const { data: championData, error } = await supabaseClient
           .from('champions')
@@ -120,77 +149,55 @@ document.addEventListener('DOMContentLoaded', async () => {
           .eq('id', currentChampion.id)
           .single();
 
-        // Handle column not existing error gracefully
+        // Handle missing columns gracefully
         if (error) {
+          // 42703: undefined_column from Postgres (column not found)
           if (error.code === '42703') {
-            // Column doesn't exist - user needs to run SQL script
             console.warn('Progress tracking columns not found. Run add-user-progress-tracking.sql in Supabase.');
-            const continueBtn = document.getElementById('continue-where-left-off-btn');
-            if (continueBtn) {
-              continueBtn.onclick = () => {
-                window.location.href = 'champion-panels.html';
-              };
-            }
+            setDefaultContinue();
             return;
           }
-          if (error.code !== 'PGRST116') throw error; // PGRST116 = no rows returned
-        }
-
-        const lastPanelId = championData?.last_active_panel_id;
-        const lastIndicatorId = championData?.last_active_indicator_id;
-        const lastActivityAt = championData?.last_activity_at;
-
-        const continueBtn = document.getElementById('continue-where-left-off-btn');
-        const continueBtnText = document.getElementById('continue-btn-text');
-        
-        if (continueBtn && lastPanelId) {
-          // Load panel and indicator info
-          const [panel, indicator] = await Promise.all([
-            lastPanelId ? DB.getPanel(lastPanelId) : null,
-            lastIndicatorId ? DB.getIndicator(lastIndicatorId) : null
-          ]);
-
-          if (panel) {
-            // Update button text
-            if (continueBtnText) {
-              const panelName = panel.title || 'Panel';
-              const indicatorName = indicator ? ` - ${indicator.title}` : '';
-              continueBtnText.textContent = `Continue: ${panelName}${indicatorName}`;
-            }
-
-            // Update button click handler
-            continueBtn.onclick = () => {
-              if (lastIndicatorId) {
-                // Go directly to the specific indicator
-                window.location.href = `champion-indicators.html?panel=${lastPanelId}&indicator=${lastIndicatorId}`;
-              } else {
-                // Go to panel indicators page
-                window.location.href = `champion-indicators.html?panel=${lastPanelId}`;
-              }
-            };
-          } else {
-            // No last activity, default behavior
-            if (continueBtnText) {
-              continueBtnText.textContent = 'Continue where you left off';
-            }
-            continueBtn.onclick = () => {
-              window.location.href = 'champion-panels.html';
-            };
+          // PGRST116: no rows returned (shouldn’t happen for an existing champion)
+          if (error.code && error.code !== 'PGRST116') {
+            throw error;
           }
-        } else if (continueBtn) {
-          // No last activity, default behavior
-          continueBtn.onclick = () => {
-            window.location.href = 'champion-panels.html';
-          };
         }
-      } catch (error) {
-        console.error('Error loading last activity:', error);
-        const continueBtn = document.getElementById('continue-where-left-off-btn');
-        if (continueBtn) {
-          continueBtn.onclick = () => {
-            window.location.href = 'champion-panels.html';
-          };
+
+        const lastPanelId = championData?.last_active_panel_id || null;
+        const lastIndicatorId = championData?.last_active_indicator_id || null;
+
+        // No last activity recorded -> default navigation
+        if (!lastPanelId) {
+          setDefaultContinue();
+          return;
         }
+
+        // Load panel and indicator info to enhance button text
+        const [panel, indicator] = await Promise.all([
+          lastPanelId ? DB.getPanel(lastPanelId) : null,
+          lastIndicatorId ? DB.getIndicator(lastIndicatorId) : null
+        ]);
+
+        // Update button text and navigation
+        const panelName = panel?.title || 'Panel';
+        const indicatorName = indicator?.title ? ` - ${indicator.title}` : '';
+
+        if (continueBtnText) {
+          continueBtnText.textContent = `Continue: ${panelName}${indicatorName}`;
+        }
+
+        continueBtn.onclick = () => {
+          // Prefer deep link to the exact indicator if present
+          if (lastIndicatorId) {
+            window.location.href = `champion-indicators.html?panel=${encodeURIComponent(lastPanelId)}&indicator=${encodeURIComponent(lastIndicatorId)}`;
+          } else {
+            window.location.href = `champion-indicators.html?panel=${encodeURIComponent(lastPanelId)}`;
+          }
+        };
+      } catch (err) {
+        console.error('Error loading last activity:', err);
+        // Always provide a safe fallback
+        setDefaultContinue();
       }
     }
 
@@ -206,26 +213,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
         weekStart.setHours(0, 0, 0, 0);
 
-        const [reviewsResult] = await Promise.all([
-          supabaseClient
-            .from('reviews')
-            .select('indicator_id, created_at, indicators:indicator_id(panel_id)')
-            .eq('champion_id', currentChampion.id)
-            .gte('created_at', weekStart.toISOString())
-        ]);
+        const { data: reviewsThisWeek } = await supabaseClient
+          .from('reviews')
+          .select('indicator_id, created_at, indicators:indicator_id(panel_id)')
+          .eq('champion_id', currentChampion.id)
+          .gte('created_at', weekStart.toISOString());
 
         // Get unique panels
         const panelIds = new Set();
-        if (reviewsResult.data) {
-          reviewsResult.data.forEach(r => {
-            if (r.indicators && r.indicators.panel_id) {
-              panelIds.add(r.indicators.panel_id);
-            }
-          });
-        }
+        (reviewsThisWeek || []).forEach(r => {
+          if (r.indicators && r.indicators.panel_id) {
+            panelIds.add(r.indicators.panel_id);
+          }
+        });
 
         const panelsCompleted = panelIds.size;
-        const indicatorsValidated = reviewsResult.data?.length || 0;
+        const indicatorsValidated = (reviewsThisWeek || []).length;
 
         // Mission 1: Complete 3 panels
         const mission1Progress = Math.min(100, (panelsCompleted / 3) * 100);
@@ -336,7 +339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const panelsWithProgress = await Promise.all(panels.map(async (panel) => {
           const indicators = await DB.getIndicators(panel.id);
           const indicatorIds = indicators?.map(i => i.id) || [];
-          
+
           if (indicatorIds.length === 0) {
             return { ...panel, progress: 0, status: 'Not Started', reviewedCount: 0 };
           }
@@ -435,13 +438,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           const indicator = activity.indicators || (activity.indicator_id ? await DB.getIndicator(activity.indicator_id) : null);
           const panel = indicator && indicator.panel_id ? await DB.getPanel(indicator.panel_id) : null;
           const isVote = activity.type === 'vote';
-          
+
           return `
             <div style="padding: 1rem; border-bottom: 1px solid #f3f4f6;">
               <div class="flex justify-between items-start">
                 <div>
                   <p class="text-gray-dark" style="font-size: 0.875rem;">
-                    ${isVote ? 'Voted on' : 'Commented on'} 
+                    ${isVote ? 'Voted on' : 'Commented on'}
                     <strong>${indicator ? indicator.title : 'Unknown Indicator'}</strong>
                     ${panel ? `in ${panel.title || panel.id}` : ''}
                   </p>
@@ -488,10 +491,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     activityRewardsTabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const targetTab = tab.dataset.tab;
-        
+
         activityRewardsTabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        
+
         document.querySelectorAll('.tab-content-panel').forEach(content => {
           content.classList.remove('active');
           if (content.id === `${targetTab}-tab`) {
@@ -544,24 +547,24 @@ document.addEventListener('DOMContentLoaded', async () => {
           DB.getPanel(panelId),
           DB.getIndicators(panelId)
         ]);
-        
+
         if (!panel) {
           console.error('Panel not found:', panelId);
           alert('Panel not found. Please refresh the page.');
           return;
         }
-        
+
         const modalTitle = document.getElementById('selection-modal-title');
         if (modalTitle) {
           modalTitle.textContent = `Select Indicators - ${panel.title}`;
         }
-        
+
         const indicatorsList = document.getElementById('indicators-selection-list');
         if (!indicatorsList) {
           console.error('Indicators selection list element not found');
           return;
         }
-        
+
         if (!Array.isArray(indicators) || indicators.length === 0) {
           indicatorsList.innerHTML = '<p class="text-gray">No indicators found for this panel.</p>';
         } else {
@@ -574,7 +577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const stars = '★'.repeat(impactStars) + '☆'.repeat(5 - impactStars);
             const importanceClass = importance.toLowerCase() === 'high' ? 'tag-high' : importance.toLowerCase() === 'medium' ? 'tag-medium' : 'tag-low';
             const difficultyClass = difficulty.toLowerCase() === 'easy' ? 'tag-easy' : difficulty.toLowerCase() === 'moderate' ? 'tag-moderate' : difficulty.toLowerCase() === 'difficult' ? 'tag-difficult' : 'tag-complex';
-            
+
             return `
               <div style="padding: 1rem; border-bottom: 1px solid #f3f4f6; display: flex; align-items: flex-start; gap: 0.75rem;">
                 <input type="checkbox" id="indicator-${indicator.id}" value="${indicator.id}" 
@@ -651,7 +654,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       proceedReviewBtn.addEventListener('click', async () => {
         const selectedIndicators = Array.from(document.querySelectorAll('.indicator-checkbox:checked'))
           .map(cb => cb.value);
-        
+
         if (selectedIndicators.length === 0) {
           alert('Please select at least one indicator to review');
           return;
@@ -676,7 +679,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Store selected indicators and navigate to review page
         localStorage.setItem('selected-indicators', JSON.stringify(selectedIndicators));
         if (selectionModal) selectionModal.classList.add('hidden');
-        window.location.href = `champion-indicators.html?panel=${currentPanelId}`;
+        window.location.href = `champion-indicators.html?panel=${encodeURIComponent(currentPanelId)}`;
       });
     }
 
@@ -699,7 +702,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         card.addEventListener('click', async (e) => {
           // Don't trigger if clicking on button
           if (e.target.closest('.panel-select-btn')) return;
-          
+
           const panelId = card.dataset.panelId || card.querySelector('.panel-select-btn')?.dataset.panelId;
           if (panelId) {
             await showIndicatorSelectionModal(panelId);
@@ -713,7 +716,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadAllPanels();
     await loadActivity();
     await calculateCredits();
-    
+
     // Attach handlers after panels are loaded
     setTimeout(() => {
       attachPanelClickHandlers();
@@ -725,7 +728,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       attachPanelClickHandlers();
       attachPanelCardClickHandlers();
     });
-    
+
     const panelsContainer = document.getElementById('all-panels-grid');
     const recommendedContainer = document.getElementById('recommended-panels');
     if (panelsContainer) {

@@ -19,14 +19,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Save last activity when page loads
-    if (panelId) {
+    // Helper: persist last active panel/indicator to Supabase
+    async function setLastActive(panelIdToSet, indicatorIdToSet) {
       try {
         await supabaseClient
           .from('champions')
           .update({
-            last_active_panel_id: panelId,
-            last_active_indicator_id: indicatorId || null,
+            last_active_panel_id: panelIdToSet || null,
+            last_active_indicator_id: indicatorIdToSet || null,
             last_activity_at: new Date().toISOString()
           })
           .eq('id', currentChampion.id);
@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error saving last activity:', error);
       }
     }
+
+    // Save last activity immediately on load (use indicator from URL if present)
+    await setLastActive(panelId, indicatorId || null);
 
     console.log('Loading panel and indicators for panel ID:', panelId);
 
@@ -94,10 +97,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           const beforeFilter = allIndicators.length;
           
           allIndicators = allIndicators.filter(ind => {
-            const indicatorId = String(ind.id);
-            const isSelected = selectedIdsAsStrings.includes(indicatorId);
+            const indIdStr = String(ind.id);
+            const isSelected = selectedIdsAsStrings.includes(indIdStr);
             if (!isSelected) {
-              console.log(`Indicator ${indicatorId} (${ind.title}) not in selected list`);
+              console.log(`Indicator ${indIdStr} (${ind.title}) not in selected list`);
             }
             return isSelected;
           });
@@ -122,6 +125,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error parsing selected indicators:', error);
         console.error('Raw stored value:', storedSelected);
       }
+    } else if (indicatorId) {
+      // NEW: If indicator query param exists, filter to that single indicator
+      const beforeFilter = allIndicators.length;
+      allIndicators = allIndicators.filter(ind => String(ind.id) === String(indicatorId));
+      console.log(`Filtered by indicator param from ${beforeFilter} to ${allIndicators.length}`);
     } else {
       console.log('No selected indicators found in localStorage - showing all indicators for panel');
     }
@@ -129,7 +137,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let indicators = allIndicators;
     const indicatorsCountEl = document.getElementById('indicators-count');
     if (indicatorsCountEl) {
-      indicatorsCountEl.textContent = `${indicators.length}${selectedIndicatorIds ? ' selected' : ''} indicator${indicators.length !== 1 ? 's' : ''}`;
+      const selectedSuffix = (selectedIndicatorIds || indicatorId) ? ' selected' : '';
+      indicatorsCountEl.textContent = `${indicators.length}${selectedSuffix} indicator${indicators.length !== 1 ? 's' : ''}`;
     }
 
     function renderIndicators(filteredIndicators) {
@@ -154,11 +163,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const indicatorsHTML = filteredIndicators.map(indicator => {
         const existingReview = getExistingReview(currentChampion.id, indicator.id);
-      const frameworks = indicator.frameworks || 'N/A';
-      const sectorContext = indicator.sectorContext || 'All';
-      const validationQuestion = indicator.validationQuestion || '';
+        const frameworks = indicator.frameworks || 'N/A';
+        const sectorContext = indicator.sectorContext || 'All';
+        const validationQuestion = indicator.validationQuestion || '';
 
-      return `
+        return `
         <div class="indicator-card card mb-6" data-indicator-id="${indicator.id}">
           <div class="flex justify-between items-start mb-6">
             <div style="flex: 1;">
@@ -197,16 +206,19 @@ document.addEventListener('DOMContentLoaded', async () => {
               <div class="flex gap-4">
                 <label style="display: flex; align-items: center; cursor: pointer;">
                   <input type="radio" name="necessary-${indicator.id}" value="yes" ${existingReview?.necessary === 'yes' ? 'checked' : ''} 
+                         class="necessary-radio"
                          style="margin-right: 0.5rem; width: 1.25rem; height: 1.25rem; cursor: pointer;">
                   <span>Yes</span>
                 </label>
                 <label style="display: flex; align-items: center; cursor: pointer;">
                   <input type="radio" name="necessary-${indicator.id}" value="no" ${existingReview?.necessary === 'no' ? 'checked' : ''}
+                         class="necessary-radio"
                          style="margin-right: 0.5rem; width: 1.25rem; height: 1.25rem; cursor: pointer;">
                   <span>No</span>
                 </label>
                 <label style="display: flex; align-items: center; cursor: pointer;">
                   <input type="radio" name="necessary-${indicator.id}" value="not-sure" ${existingReview?.necessary === 'not-sure' ? 'checked' : ''}
+                         class="necessary-radio"
                          style="margin-right: 0.5rem; width: 1.25rem; height: 1.25rem; cursor: pointer;">
                   <span>Not sure</span>
                 </label>
@@ -232,170 +244,209 @@ document.addEventListener('DOMContentLoaded', async () => {
               <label style="display: block; margin-bottom: 0.75rem; font-weight: 500;">Comments</label>
               <textarea name="comments-${indicator.id}" 
                         placeholder="Enter comments or references...." 
+                        class="comments-textarea"
                         style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; font-family: inherit; resize: vertical; min-height: 100px;">${existingReview?.comments || ''}</textarea>
             </div>
           </form>
         </div>
       `;
-    }).join('');
+      }).join('');
 
-    // Add submit all button at the bottom
-    if (filteredIndicators.length > 0) {
-      indicatorsList.innerHTML = indicatorsHTML + `
+      // Add submit all button at the bottom
+      if (filteredIndicators.length > 0) {
+        indicatorsList.innerHTML = indicatorsHTML + `
         <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
           <button id="submit-all-reviews-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem; font-weight: 600;">
             Submit All Reviews
           </button>
         </div>
       `;
-    } else {
-      indicatorsList.innerHTML = indicatorsHTML;
+      } else {
+        indicatorsList.innerHTML = indicatorsHTML;
+      }
+
+      // Persist last active to the first visible indicator (if any)
+      const firstVisibleIndicatorId = filteredIndicators[0]?.id;
+      if (firstVisibleIndicatorId) {
+        setLastActive(panelId, firstVisibleIndicatorId);
+      }
+
+      // Attach event listeners
+      attachEventListeners();
     }
 
-    // Attach event listeners
-    attachEventListeners();
-  }
-
-  function getExistingReview(championId, indicatorId) {
-    const reviews = JSON.parse(localStorage.getItem('esg-reviews') || '[]');
-    return reviews.find(r => r.championId === championId && r.indicatorId === indicatorId);
-  }
-
-  function saveReview(championId, indicatorId, reviewData) {
-    const reviews = JSON.parse(localStorage.getItem('esg-reviews') || '[]');
-    const existingIndex = reviews.findIndex(r => r.championId === championId && r.indicatorId === indicatorId);
-    
-    const review = {
-      id: existingIndex >= 0 ? reviews[existingIndex].id : Date.now().toString(),
-      championId,
-      indicatorId,
-      necessary: reviewData.necessary,
-      rating: reviewData.rating,
-      comments: reviewData.comments,
-      timestamp: new Date().toISOString()
-    };
-
-    if (existingIndex >= 0) {
-      reviews[existingIndex] = review;
-    } else {
-      reviews.push(review);
+    function getExistingReview(championId, indicatorId) {
+      const reviews = JSON.parse(localStorage.getItem('esg-reviews') || '[]');
+      return reviews.find(r => r.championId === championId && r.indicatorId === indicatorId);
     }
 
-    localStorage.setItem('esg-reviews', JSON.stringify(reviews));
-  }
-
-  function attachEventListeners() {
-    // Star rating
-    document.querySelectorAll('.star-rating').forEach(rating => {
-      const indicatorId = rating.dataset.indicatorId;
-      const hiddenInput = document.querySelector(`input[name="rating-${indicatorId}"]`);
+    function saveReview(championId, indicatorId, reviewData) {
+      const reviews = JSON.parse(localStorage.getItem('esg-reviews') || '[]');
+      const existingIndex = reviews.findIndex(r => r.championId === championId && r.indicatorId === indicatorId);
       
-      rating.querySelectorAll('.star-btn').forEach((btn, index) => {
-        btn.addEventListener('click', () => {
-          const ratingValue = index + 1;
-          hiddenInput.value = ratingValue;
-          
-          // Update star colors
-          rating.querySelectorAll('.star-btn').forEach((star, i) => {
-            star.style.color = i < ratingValue ? '#fbbf24' : '#d1d5db';
+      const review = {
+        id: existingIndex >= 0 ? reviews[existingIndex].id : Date.now().toString(),
+        championId,
+        indicatorId,
+        necessary: reviewData.necessary,
+        rating: reviewData.rating,
+        comments: reviewData.comments,
+        timestamp: new Date().toISOString()
+      };
+
+      if (existingIndex >= 0) {
+        reviews[existingIndex] = review;
+      } else {
+        reviews.push(review);
+      }
+
+      localStorage.setItem('esg-reviews', JSON.stringify(reviews));
+    }
+
+    function attachEventListeners() {
+      // Star rating
+      document.querySelectorAll('.star-rating').forEach(rating => {
+        const indicatorIdForStars = rating.dataset.indicatorId;
+        const hiddenInput = document.querySelector(`input[name="rating-${indicatorIdForStars}"]`);
+        
+        rating.querySelectorAll('.star-btn').forEach((btn, index) => {
+          btn.addEventListener('click', async () => {
+            const ratingValue = index + 1;
+            hiddenInput.value = ratingValue;
+            
+            // Update star colors
+            rating.querySelectorAll('.star-btn').forEach((star, i) => {
+              star.style.color = i < ratingValue ? '#fbbf24' : '#d1d5db';
+            });
+
+            // Persist last active to this indicator
+            await setLastActive(panelId, indicatorIdForStars);
           });
         });
       });
-    });
 
-    // Prevent individual form submissions
-    document.querySelectorAll('.validation-form').forEach(form => {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
+      // Persist last active when selecting necessary yes/no/not-sure
+      document.querySelectorAll('.necessary-radio').forEach(radio => {
+        radio.addEventListener('change', async (e) => {
+          const form = e.target.closest('.validation-form');
+          const indId = form?.dataset?.indicatorId;
+          if (indId) {
+            await setLastActive(panelId, indId);
+          }
+        });
       });
-    });
 
-    // Submit all reviews button
-    const submitAllBtn = document.getElementById('submit-all-reviews-btn');
-    if (submitAllBtn) {
-      submitAllBtn.addEventListener('click', () => {
-        submitAllReviews();
+      // Persist last active when focusing or typing in comments
+      document.querySelectorAll('.comments-textarea').forEach(textarea => {
+        textarea.addEventListener('focus', async (e) => {
+          const form = e.target.closest('.validation-form');
+          const indId = form?.dataset?.indicatorId;
+          if (indId) {
+            await setLastActive(panelId, indId);
+          }
+        });
+        textarea.addEventListener('input', async (e) => {
+          const form = e.target.closest('.validation-form');
+          const indId = form?.dataset?.indicatorId;
+          if (indId) {
+            await setLastActive(panelId, indId);
+          }
+        });
       });
-    }
-  }
 
-  async function submitAllReviews() {
-    const allForms = document.querySelectorAll('.validation-form');
-    const reviewsToSubmit = [];
-    let hasErrors = false;
-    const missingIndicators = [];
+      // Prevent individual form submissions
+      document.querySelectorAll('.validation-form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+        });
+      });
 
-    allForms.forEach(form => {
-      const indicatorId = form.dataset.indicatorId;
-      const necessary = form.querySelector(`input[name="necessary-${indicatorId}"]:checked`)?.value;
-      const rating = parseInt(form.querySelector(`input[name="rating-${indicatorId}"]`).value) || 0;
-      const comments = form.querySelector(`textarea[name="comments-${indicatorId}"]`).value.trim();
-      
-      if (!necessary) {
-        hasErrors = true;
-        const indicatorTitle = form.closest('.indicator-card').querySelector('h3').textContent;
-        missingIndicators.push(indicatorTitle);
-      } else {
-        reviewsToSubmit.push({
-          indicatorId,
-          necessary,
-          rating,
-          comments
+      // Submit all reviews button
+      const submitAllBtn = document.getElementById('submit-all-reviews-btn');
+      if (submitAllBtn) {
+        submitAllBtn.addEventListener('click', () => {
+          submitAllReviews();
         });
       }
-    });
-
-    if (hasErrors) {
-      alert(`Please review all indicators before submitting.\n\nMissing reviews for:\n${missingIndicators.join('\n')}`);
-      return;
     }
 
-    if (reviewsToSubmit.length === 0) {
-      alert('No reviews to submit. Please fill in at least one review.');
-      return;
-    }
+    async function submitAllReviews() {
+      const allForms = document.querySelectorAll('.validation-form');
+      const reviewsToSubmit = [];
+      let hasErrors = false;
+      const missingIndicators = [];
 
-    // Save all reviews to Supabase with pending status
-    try {
-      const savePromises = reviewsToSubmit.map(async (reviewData) => {
-        // Save review to Supabase with pending status
-        await SupabaseService.saveReview(currentChampion.id, reviewData.indicatorId, {
-          necessary: reviewData.necessary,
-          rating: reviewData.rating,
-          comments: reviewData.comments,
-          status: 'pending' // All new reviews start as pending
-        });
-
-        // Also save as comment for backward compatibility
-        if (reviewData.comments) {
-          await DB.saveComment(currentChampion.id, reviewData.indicatorId, reviewData.comments);
-        }
-      });
-
-      await Promise.all(savePromises);
-      
-      // Show success popup
-      const successModal = document.getElementById('submission-success-modal');
-      if (successModal) {
-        successModal.classList.remove('hidden');
+      allForms.forEach(form => {
+        const indicatorIdInForm = form.dataset.indicatorId;
+        const necessary = form.querySelector(`input[name="necessary-${indicatorIdInForm}"]:checked`)?.value;
+        const rating = parseInt(form.querySelector(`input[name="rating-${indicatorIdInForm}"]`).value) || 0;
+        const comments = form.querySelector(`textarea[name="comments-${indicatorIdInForm}"]`).value.trim();
         
-        // Handle return to dashboard button
-        const returnBtn = document.getElementById('return-to-dashboard-btn');
-        if (returnBtn) {
-          returnBtn.onclick = () => {
-            window.location.href = 'champion-dashboard.html';
-          };
+        if (!necessary) {
+          hasErrors = true;
+          const indicatorTitle = form.closest('.indicator-card').querySelector('h3').textContent;
+          missingIndicators.push(indicatorTitle);
+        } else {
+          reviewsToSubmit.push({
+            indicatorId: indicatorIdInForm,
+            necessary,
+            rating,
+            comments
+          });
         }
-      } else {
-        // Fallback: redirect after a short delay
-        alert('Reviews submitted successfully!');
-        window.location.href = 'champion-panels.html';
+      });
+
+      if (hasErrors) {
+        alert(`Please review all indicators before submitting.\n\nMissing reviews for:\n${missingIndicators.join('\n')}`);
+        return;
       }
-    } catch (error) {
-      console.error('Error saving reviews:', error);
-      alert('Error submitting reviews. Please try again.');
+
+      if (reviewsToSubmit.length === 0) {
+        alert('No reviews to submit. Please fill in at least one review.');
+        return;
+      }
+
+      // Save all reviews to Supabase with pending status
+      try {
+        const savePromises = reviewsToSubmit.map(async (reviewData) => {
+          // Save review to Supabase with pending status
+          await SupabaseService.saveReview(currentChampion.id, reviewData.indicatorId, {
+            necessary: reviewData.necessary,
+            rating: reviewData.rating,
+            comments: reviewData.comments,
+            status: 'pending' // All new reviews start as pending
+          });
+
+          // Also save as comment for backward compatibility
+          if (reviewData.comments) {
+            await DB.saveComment(currentChampion.id, reviewData.indicatorId, reviewData.comments);
+          }
+        });
+
+        await Promise.all(savePromises);
+        
+        // Show success popup
+        const successModal = document.getElementById('submission-success-modal');
+        if (successModal) {
+          successModal.classList.remove('hidden');
+          
+          // Handle return to dashboard button
+          const returnBtn = document.getElementById('return-to-dashboard-btn');
+          if (returnBtn) {
+            returnBtn.onclick = () => {
+              window.location.href = 'champion-dashboard.html';
+            };
+          }
+        } else {
+          // Fallback: redirect after a short delay
+          alert('Reviews submitted successfully!');
+          window.location.href = 'champion-panels.html';
+        }
+      } catch (error) {
+        console.error('Error saving reviews:', error);
+        alert('Error submitting reviews. Please try again.');
+      }
     }
-  }
 
     // Initial render
     console.log('Rendering', indicators.length, 'indicators...');
@@ -403,7 +454,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Scroll to specific indicator if provided in URL
     if (indicatorId) {
-      setTimeout(() => {
+      setTimeout(async () => {
         const indicatorElement = document.querySelector(`[data-indicator-id="${indicatorId}"]`);
         if (indicatorElement) {
           indicatorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -413,164 +464,166 @@ document.addEventListener('DOMContentLoaded', async () => {
           setTimeout(() => {
             indicatorElement.style.backgroundColor = '';
           }, 2000);
+
+          await setLastActive(panelId, indicatorId);
         }
       }, 1000);
     }
 
-  function applyFilters() {
-    const searchTerm = document.getElementById('indicator-search')?.value.toLowerCase() || '';
-    const sector = document.getElementById('indicator-filter-sector')?.value || 'all';
-    
-    let filtered = [...indicators];
-    
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(i => 
-        i.title.toLowerCase().includes(searchTerm) || 
-        i.description.toLowerCase().includes(searchTerm)
-      );
+    function applyFilters() {
+      const searchTerm = document.getElementById('indicator-search')?.value.toLowerCase() || '';
+      const sector = document.getElementById('indicator-filter-sector')?.value || 'all';
+      
+      let filtered = [...indicators];
+      
+      // Filter by search term
+      if (searchTerm) {
+        filtered = filtered.filter(i => 
+          i.title.toLowerCase().includes(searchTerm) || 
+          i.description.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      // Filter by sector
+      if (sector !== 'all') {
+        filtered = filtered.filter(i => 
+          i.sectorContext && i.sectorContext.includes(sector)
+        );
+      }
+      
+      renderIndicators(filtered);
     }
-    
-    // Filter by sector
-    if (sector !== 'all') {
-      filtered = filtered.filter(i => 
-        i.sectorContext && i.sectorContext.includes(sector)
-      );
+
+    // Search functionality
+    const searchInput = document.getElementById('indicator-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
     }
-    
-    renderIndicators(filtered);
-  }
 
-  // Search functionality
-  const searchInput = document.getElementById('indicator-search');
-  if (searchInput) {
-    searchInput.addEventListener('input', applyFilters);
-  }
-
-  // Sector filter functionality
-  const sectorFilter = document.getElementById('indicator-filter-sector');
-  if (sectorFilter) {
-    sectorFilter.addEventListener('change', applyFilters);
-  }
-
-  // Invite peers modal
-  const inviteBtn = document.getElementById('invite-peers-btn');
-  const inviteModal = document.getElementById('invite-modal');
-  const closeInviteModal = document.getElementById('close-invite-modal');
-  const inviteForm = document.getElementById('invite-form');
-  const inviteEmailInput = document.getElementById('invite-email');
-  const inviteMessageInput = document.getElementById('invite-message');
-  const previewContent = document.getElementById('preview-content');
-  const shareLinkedInBtn = document.getElementById('share-linkedin-btn');
-
-  // Update preview when message changes
-  function updateInvitationPreview() {
-    if (previewContent && inviteMessageInput) {
-      const message = inviteMessageInput.value.trim() || "I'm inviting you to review an ESG indicator.";
-      previewContent.textContent = `Hello,\n\n${message}`;
+    // Sector filter functionality
+    const sectorFilter = document.getElementById('indicator-filter-sector');
+    if (sectorFilter) {
+      sectorFilter.addEventListener('change', applyFilters);
     }
-  }
 
-  // Initialize preview on load
-  if (inviteMessageInput) {
-    inviteMessageInput.addEventListener('input', updateInvitationPreview);
-    updateInvitationPreview(); // Set initial preview
-  }
+    // Invite peers modal
+    const inviteBtn = document.getElementById('invite-peers-btn');
+    const inviteModal = document.getElementById('invite-modal');
+    const closeInviteModal = document.getElementById('close-invite-modal');
+    const inviteForm = document.getElementById('invite-form');
+    const inviteEmailInput = document.getElementById('invite-email');
+    const inviteMessageInput = document.getElementById('invite-message');
+    const previewContent = document.getElementById('preview-content');
+    const shareLinkedInBtn = document.getElementById('share-linkedin-btn');
 
-  if (inviteBtn) {
-    inviteBtn.addEventListener('click', () => {
-      inviteModal.classList.remove('hidden');
-      updateInvitationPreview(); // Update preview when modal opens
-    });
-  }
+    // Update preview when message changes
+    function updateInvitationPreview() {
+      if (previewContent && inviteMessageInput) {
+        const message = inviteMessageInput.value.trim() || "I'm inviting you to review an ESG indicator.";
+        previewContent.textContent = `Hello,\n\n${message}`;
+      }
+    }
 
-  if (closeInviteModal) {
-    closeInviteModal.addEventListener('click', () => {
-      inviteModal.classList.add('hidden');
-      if (inviteForm) inviteForm.reset();
-      updateInvitationPreview(); // Reset preview
-    });
-  }
+    // Initialize preview on load
+    if (inviteMessageInput) {
+      inviteMessageInput.addEventListener('input', updateInvitationPreview);
+      updateInvitationPreview(); // Set initial preview
+    }
 
-  // Close modal when clicking outside
-  if (inviteModal) {
-    inviteModal.addEventListener('click', (e) => {
-      if (e.target === inviteModal) {
+    if (inviteBtn) {
+      inviteBtn.addEventListener('click', () => {
+        inviteModal.classList.remove('hidden');
+        updateInvitationPreview(); // Update preview when modal opens
+      });
+    }
+
+    if (closeInviteModal) {
+      closeInviteModal.addEventListener('click', () => {
         inviteModal.classList.add('hidden');
         if (inviteForm) inviteForm.reset();
-        updateInvitationPreview();
-      }
-    });
-  }
+        updateInvitationPreview(); // Reset preview
+      });
+    }
 
-  // Validate email addresses
-  function validateEmails(emailString) {
-    if (!emailString.trim()) return { valid: false, emails: [] };
-    
-    const emails = emailString.split(',').map(email => email.trim()).filter(email => email);
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const invalidEmails = emails.filter(email => !emailRegex.test(email));
-    
-    return {
-      valid: invalidEmails.length === 0 && emails.length > 0,
-      emails: emails,
-      invalid: invalidEmails
-    };
-  }
-
-  // Handle form submission
-  if (inviteForm) {
-    inviteForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const emailString = inviteEmailInput?.value.trim() || '';
-      const message = inviteMessageInput?.value.trim() || "I'm inviting you to review an ESG indicator.\nThanks!";
-      
-      const emailValidation = validateEmails(emailString);
-      
-      if (!emailValidation.valid) {
-        if (emailValidation.invalid.length > 0) {
-          alert(`Please enter valid email addresses. Invalid: ${emailValidation.invalid.join(', ')}`);
-        } else {
-          alert('Please enter at least one email address');
+    // Close modal when clicking outside
+    if (inviteModal) {
+      inviteModal.addEventListener('click', (e) => {
+        if (e.target === inviteModal) {
+          inviteModal.classList.add('hidden');
+          if (inviteForm) inviteForm.reset();
+          updateInvitationPreview();
         }
-        return;
-      }
-      
-      try {
-        // Send invitations to all emails
-        const invitationPromises = emailValidation.emails.map(email => 
-          DB.saveInvitation(currentChampion.id, email, panelId, message)
-        );
-        
-        await Promise.all(invitationPromises);
-        alert(`Invitations sent successfully to ${emailValidation.emails.length} recipient(s)!`);
-        inviteForm.reset();
-        updateInvitationPreview();
-        inviteModal.classList.add('hidden');
-      } catch (error) {
-        console.error('Error sending invitations:', error);
-        alert('Failed to send invitations. Please try again.');
-      }
-    });
-  }
+      });
+    }
 
-  // Handle LinkedIn share
-  if (shareLinkedInBtn) {
-    shareLinkedInBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const message = inviteMessageInput?.value.trim() || "I'm inviting you to review an ESG indicator.\nThanks!";
-      const panelTitle = document.getElementById('panel-title')?.textContent || 'ESG Indicator';
+    // Validate email addresses
+    function validateEmails(emailString) {
+      if (!emailString.trim()) return { valid: false, emails: [] };
       
-      // Create LinkedIn share URL
-      const shareText = encodeURIComponent(`${message}\n\nReview: ${panelTitle}`);
-      const shareUrl = encodeURIComponent(window.location.href);
-      const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
+      const emails = emailString.split(',').map(email => email.trim()).filter(email => email);
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const invalidEmails = emails.filter(email => !emailRegex.test(email));
       
-      // Open LinkedIn share in new window
-      window.open(linkedInShareUrl, 'LinkedIn Share', 'width=600,height=400,menubar=no,toolbar=no,resizable=yes,scrollbars=yes');
-    });
-  }
-  
+      return {
+        valid: invalidEmails.length === 0 && emails.length > 0,
+        emails: emails,
+        invalid: invalidEmails
+      };
+    }
+
+    // Handle form submission
+    if (inviteForm) {
+      inviteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const emailString = inviteEmailInput?.value.trim() || '';
+        const message = inviteMessageInput?.value.trim() || "I'm inviting you to review an ESG indicator.\nThanks!";
+        
+        const emailValidation = validateEmails(emailString);
+        
+        if (!emailValidation.valid) {
+          if (emailValidation.invalid.length > 0) {
+            alert(`Please enter valid email addresses. Invalid: ${emailValidation.invalid.join(', ')}`);
+          } else {
+            alert('Please enter at least one email address');
+          }
+          return;
+        }
+        
+        try {
+          // Send invitations to all emails
+          const invitationPromises = emailValidation.emails.map(email => 
+            DB.saveInvitation(currentChampion.id, email, panelId, message)
+          );
+          
+          await Promise.all(invitationPromises);
+          alert(`Invitations sent successfully to ${emailValidation.emails.length} recipient(s)!`);
+          inviteForm.reset();
+          updateInvitationPreview();
+          inviteModal.classList.add('hidden');
+        } catch (error) {
+          console.error('Error sending invitations:', error);
+          alert('Failed to send invitations. Please try again.');
+        }
+      });
+    }
+
+    // Handle LinkedIn share
+    if (shareLinkedInBtn) {
+      shareLinkedInBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const message = inviteMessageInput?.value.trim() || "I'm inviting you to review an ESG indicator.\nThanks!";
+        const panelTitle = document.getElementById('panel-title')?.textContent || 'ESG Indicator';
+        
+        // Create LinkedIn share URL
+        const shareText = encodeURIComponent(`${message}\n\nReview: ${panelTitle}`);
+        const shareUrl = encodeURIComponent(window.location.href);
+        const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`;
+        
+        // Open LinkedIn share in new window
+        window.open(linkedInShareUrl, 'LinkedIn Share', 'width=600,height=400,menubar=no,toolbar=no,resizable=yes,scrollbars=yes');
+      });
+    }
+    
   } catch (error) {
     console.error('Error initializing indicators page:', error);
     const indicatorsList = document.getElementById('indicators-list');
@@ -583,4 +636,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 });
-
