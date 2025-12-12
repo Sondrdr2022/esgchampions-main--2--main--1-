@@ -1,5 +1,5 @@
 // Dynamic Navigation System with Role-Based Visibility
-// Handles: Admin button, Membership/Dashboard toggle, Logout
+// Handles: Admin button, Membership/Dashboard toggle, Account Settings, Logout
 // Works across all pages with consistent behavior
 
 let navigationState = {
@@ -113,6 +113,8 @@ async function updateNavigation() {
   let rankingsBtn = document.getElementById('nav-rankings-btn') || 
                     nav.querySelector('a[href="ranking.html"]');
   let logoutBtn = document.getElementById('logout-btn');
+  let accountSettingsBtn = document.getElementById('account-settings-btn') ||
+    nav.querySelector('a[href="champion-profile.html"]');
 
   // ============================================
   // MEMBERSHIP / DASHBOARD TOGGLE
@@ -176,6 +178,40 @@ async function updateNavigation() {
     // Hide Dashboard button
     if (dashboardBtn) {
       dashboardBtn.style.display = 'none';
+    }
+  }
+
+  // ============================================
+  // ACCOUNT SETTINGS BUTTON (NEW)
+  // ============================================
+  if (isLoggedIn) {
+    if (!accountSettingsBtn) {
+      accountSettingsBtn = document.createElement('a');
+      accountSettingsBtn.href = 'champion-profile.html';
+      accountSettingsBtn.className = 'btn-secondary';
+      accountSettingsBtn.id = 'account-settings-btn';
+      accountSettingsBtn.textContent = 'Account Settings';
+
+      // Insert Account Settings after Dashboard and before Rankings
+      if (dashboardBtn && dashboardBtn.style.display !== 'none') {
+        nav.insertBefore(accountSettingsBtn, dashboardBtn.nextSibling);
+      } else if (rankingsBtn) {
+        nav.insertBefore(accountSettingsBtn, rankingsBtn);
+      } else if (logoutBtn) {
+        nav.insertBefore(accountSettingsBtn, logoutBtn);
+      } else {
+        nav.appendChild(accountSettingsBtn);
+      }
+    } else {
+      // Ensure correct styling and show
+      accountSettingsBtn.style.display = '';
+      accountSettingsBtn.className = 'btn-secondary';
+      accountSettingsBtn.href = 'champion-profile.html';
+      accountSettingsBtn.textContent = 'Account Settings';
+    }
+  } else {
+    if (accountSettingsBtn) {
+      accountSettingsBtn.style.display = 'none';
     }
   }
 
@@ -322,4 +358,3 @@ if (typeof window !== 'undefined') {
     getState: () => ({ ...navigationState })
   };
 }
-

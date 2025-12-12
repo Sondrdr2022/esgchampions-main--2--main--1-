@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account Settings | STIF</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- ⭐ PROFESSIONAL + DASHBOARD GRADIENT + FIXED LAYOUT -->
+  <style>
+    /* MATCH DASHBOARD BACKGROUND */
+    body.stif-pattern {
+      background: linear-gradient(135deg, #e6edf5 0%, #d9e5ef 35%, #c8d7e4 70%, #b8c9da 100%);
+      min-height: 100vh;
+    }
+
+    /* Wrapper */
+    .settings-wrapper {
+      max-width: 900px;
+      margin: 3rem auto 5rem;
+    }
+
+    /* Card */
+    .settings-card {
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 40px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+
+    .settings-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0D4D6C;
+      margin-bottom: .4rem;
+    }
+
+    .settings-subtitle {
+      color: #6b7280;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-heading {
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #0D4D6C;
+    }
+
+    /* Grid */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.6rem 2rem;
+    }
+
+    .settings-card label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: .35rem;
+      color: #374151;
+    }
+
+    .settings-card input,
+    .settings-card textarea,
+    .settings-card select {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: .95rem;
+      background: white;
+      transition: 0.2s ease;
+    }
+
+    .settings-card input:focus,
+    .settings-card textarea:focus,
+    .settings-card select:focus {
+      border-color: #0D4D6C;
+      box-shadow: 0 0 0 3px rgba(13, 77, 108, 0.18);
+      outline: none;
+    }
+
+    @media (max-width: 768px) {
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+      .settings-card {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Status messages */
+    #save-status, #delete-status {
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body class="stif-pattern">
+
+  <!-- HEADER -->
+  <header>
+    <div class="container header-content">
+      <a href="index.html" class="logo">stif.</a>
+
+      <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About STIF</a>
+        <a href="champion-dashboard.html" class="btn-primary" id="dashboard-btn">Dashboard</a>
+        <a href="champion-profile.html" class="btn-secondary" id="account-settings-btn">Account Settings</a>
+        <a href="ranking.html" class="btn-primary">Rankings</a>
+        <a href="#" id="logout-btn" class="btn-secondary">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="section">
+    <div class="settings-wrapper">
+      <div class="settings-card">
+
+        <h1 class="settings-title">Account Settings</h1>
+
+        <form id="account-settings-form">
+          <!-- Status placeholders -->
+          <div id="save-status" aria-live="polite"></div>
+
+          <!-- 1.1 BASIC INFORMATION -->
+          <h2 class="section-heading">1.1 Basic Information</h2>
+          <div class="settings-grid">
+            <div>
+              <label>First Name *</label>
+              <input id="first_name" type="text" placeholder="First Name" required />
+            </div>
+            <div>
+              <label>Last Name *</label>
+              <input id="last_name" type="text" placeholder="Last Name" required />
+            </div>
+            <div class="col-span-2">
+              <label>Company / Organisation Name *</label>
+              <input id="organization" type="text" placeholder="Organisation" required />
+            </div>
+            <div class="col-span-2">
+              <label>Role / Designation *</label>
+              <input id="role" type="text" placeholder="Job Title" required />
+            </div>
+          </div>
+
+          <!-- 1.2 CONTACT DETAILS -->
+          <h2 class="section-heading">1.2 Contact Details</h2>
+          <div class="settings-grid">
+            <div class="col-span-2">
+              <label>Business Email *</label>
+              <input id="email" type="email" readonly />
+            </div>
+            <div class="col-span-2">
+              <label>Mobile Number *</label>
+              <input id="mobile" type="text" placeholder="+44 123 456 7890" required />
+            </div>
+            <div class="col-span-2">
+              <label>Office Phone Number</label>
+              <input id="office_phone" type="text" placeholder="+44 123 456 7891" />
+            </div>
+            <div class="col-span-2">
+              <label>LinkedIn Profile</label>
+              <input id="linkedin" type="text" placeholder="https://linkedin.com/in/yourprofile" />
+            </div>
+            <div class="col-span-2">
+              <label>Professional Website</label>
+              <input id="website" type="text" placeholder="https://yourwebsite.com" />
+            </div>
+          </div>
+
+          <!-- 1.3 ESG EXPERTISE -->
+          <h2 class="section-heading">1.3 ESG Expertise & Achievements</h2>
+          <div class="settings-grid">
+            <div class="col-span-2">
+              <label>Competence in ESG Reporting</label>
+              <select id="esg_competence">
+                <option>Select your competence level</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+                <option>Expert</option>
+              </select>
+            </div>
+            <div class="col-span-2">
+              <label>Key ESG Contributions</label>
+              <textarea id="esg_contributions" placeholder="Enter your key ESG achievements"></textarea>
+            </div>
+          </div>
+
+          <!-- 1.4 AREAS OF INTEREST -->
+          <h2 class="section-heading">1.4 Areas of Interest</h2>
+          <div class="settings-grid">
+            <div class="col-span-2">
+              <label>Primary Sectors of Focus *</label>
+              <select id="sector_focus" required>
+                <option>Select sector</option>
+                <option>Energy</option>
+                <option>Finance</option>
+                <option>Healthcare</option>
+                <option>Technology</option>
+                <option>Manufacturing</option>
+              </select>
+            </div>
+            <div class="col-span-2">
+              <label>Area of Expertise (Panels) *</label>
+              <select id="expertise" required>
+                <option>Select expertise</option>
+                <option>ESG Reporting</option>
+                <option>Corporate Governance</option>
+                <option>Sustainable Finance</option>
+                <option>Climate Strategy</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SAVE BUTTON -->
+          <div class="settings-actions">
+            <button type="submit" class="btn-primary">Save Changes</button>
+          </div>
+
+          <!-- Delete feedback area -->
+          <div id="delete-status" aria-live="polite"></div>
+          <!-- Delete button appended by JS if missing -->
+        </form>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2025 STIF. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Supabase must be initialized BEFORE any script that uses supabaseClient -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-service.js"></script>
+
+  <!-- UI and navigation helpers -->
+  <script src="mobile-menu.js"></script>
+  <script src="membership-modal.js"></script>
+  <script src="dynamic-navigation.js"></script>
+  <script src="logout.js"></script>
+
+  <!-- Profile page logic (uses supabaseClient) -->
+  <script src="champion-profile.js"></script>
+</body>
+</html>
