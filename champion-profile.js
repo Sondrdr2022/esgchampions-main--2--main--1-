@@ -24,18 +24,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     deleteEl = document.createElement('div');
     deleteEl.id = 'delete-status';
     deleteEl.style.margin = '10px 0 10px 0';
+    // Keep delete-status container for future notices if needed, but we won't show a delete button.
     form.appendChild(deleteEl);
   }
 
-  // Add Delete Account button if not present
-  if (!document.getElementById('delete-account-btn')) {
-    const delBtn = document.createElement('button');
-    delBtn.type = 'button';
-    delBtn.className = 'btn-secondary';
-    delBtn.textContent = 'Delete Account';
-    delBtn.id = 'delete-account-btn';
-    delBtn.style.marginTop = '2rem';
-    form.appendChild(delBtn);
+  // Ensure any legacy Delete Account button is removed/hidden if present
+  const legacyDeleteBtn = document.getElementById('delete-account-btn');
+  if (legacyDeleteBtn) {
+    legacyDeleteBtn.remove(); // Remove from DOM
   }
 
   const $ = (id) => document.getElementById(id);
@@ -44,7 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   function setValue(id, value) {
     const el = $(id);
     if (!el) return;
-    // For selects, ensure the option exists; otherwise, set value and let UI show default
     el.value = value ?? "";
   }
   function getValue(id) {
@@ -160,50 +155,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusEl.style.color = "green";
   });
 
-  // 5) Delete account handler
-  const deleteBtn = document.getElementById('delete-account-btn');
-  if (deleteBtn) {
-    deleteBtn.onclick = async function () {
-      if (!confirm(
-        "Are you sure you want to delete your account? This cannot be undone and will remove all your information."
-      )) {
-        return;
-      }
-      deleteBtn.disabled = true;
-      deleteBtn.textContent = 'Deleting...';
-      deleteEl.textContent = "";
-      deleteEl.style.color = "";
-
-      // Delete champion row for this user
-      const { error: dbErr } = await supabaseClient
-        .from('champions')
-        .delete()
-        .eq('id', user.id);
-
-      if (dbErr) {
-        deleteEl.textContent = "Error deleting user data. Try again.";
-        deleteEl.style.color = "red";
-        deleteBtn.disabled = false;
-        deleteBtn.textContent = 'Delete Account';
-        console.error(dbErr);
-        return;
-      }
-
-      // Sign out the user
-      try {
-        await supabaseClient.auth.signOut();
-        deleteEl.textContent = "Account deleted.";
-        deleteEl.style.color = "green";
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 1300);
-      } catch (ex) {
-        deleteEl.textContent = "Account data deleted, but error logging out.";
-        deleteEl.style.color = "orange";
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 1200);
-      }
-    };
-  }
+  // Delete account handler removed per request.
 });
