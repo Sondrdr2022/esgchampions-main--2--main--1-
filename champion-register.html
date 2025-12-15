@@ -218,12 +218,13 @@
           <!-- 1.5 Legal -->
           <div class="mb-8" style="padding-top: 2rem; border-top: 1px solid #e5e7eb;">
             <h3 class="mb-6" style="font-size: 1.25rem; font-weight: 600; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;">1.5 Legal</h3>
-            
+
             <!-- Step 1: CLA -->
             <div class="checkbox-group mb-4">
               <input type="checkbox" id="champion-cla" name="cla" required>
               <label for="champion-cla">
-                I accept the <a href="#" id="cla-link" class="text-primary" style="text-decoration: underline;">Contributor License Agreement (CLA)</a>
+                I accept the
+                <a href="#" id="cla-link" class="text-primary" style="text-decoration: underline;">Contributor License Agreement (CLA)</a>
                 <span style="color: #ef4444;"> *</span>
               </label>
             </div>
@@ -233,7 +234,8 @@
               <div class="checkbox-group mb-3">
                 <input type="checkbox" id="champion-nda-check" name="ndaCheck" required>
                 <label for="champion-nda-check">
-                  I have read and agree to the <a href="#" id="nda-link" class="text-primary" style="text-decoration: underline;">Non-Disclosure Agreement (NDA)</a>
+                  I have read and agree to the
+                  <a href="#" id="nda-link" class="text-primary" style="text-decoration: underline;">Non-Disclosure Agreement (NDA)</a>
                   <span style="color: #ef4444;"> *</span>
                 </label>
               </div>
@@ -248,16 +250,19 @@
             <div class="checkbox-group mb-4">
               <input type="checkbox" id="champion-acceptedTerms" name="acceptedTerms" required>
               <label for="champion-acceptedTerms">
-                I accept the <a href="terms.html" class="text-primary" style="text-decoration: underline;">Terms & Conditions</a>
+                I accept the
+                <a href="#" id="terms-link" class="text-primary" style="text-decoration: underline;">Terms & Conditions</a>
                 <span style="color: #ef4444;"> *</span>
               </label>
             </div>
 
-            <!-- Step 6: IP & Attribution Policy -->
+            <!-- Step 4: IP & Attribution -->
             <div class="checkbox-group" style="margin-bottom: 2rem;">
               <input type="checkbox" id="champion-ip-policy" name="ipPolicy">
               <label for="champion-ip-policy">
-                I accept the <a href="#" class="text-primary" style="text-decoration: underline;">IP & Attribution Policy</a> (optional if covered in CLA)
+                I accept the
+                <a href="#" id="ip-link" class="text-primary" style="text-decoration: underline;">IP & Attribution Policy</a>
+                (optional if covered in CLA)
               </label>
             </div>
           </div>
@@ -275,6 +280,17 @@
       </div>
     </div>
   </main>
+
+  <!-- Legal Modal (shared) -->
+  <div id="legal-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="legal-modal-title" style="margin: 0;">Legal Information</h2>
+        <button id="close-legal-modal" class="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="legal-modal-body" style="max-height: 70vh; overflow-y: auto; line-height: 1.7;"></div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer>
@@ -321,24 +337,6 @@
     </div>
   </footer>
 
-  <!-- Membership Modal -->
-  <div id="membership-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="flex justify-between items-center mb-6">
-        <h2>Choose your account type</h2>
-        <button id="close-membership-modal" class="modal-close">&times;</button>
-      </div>
-      <div class="flex flex-col gap-4">
-        <button id="business-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
-          Business
-        </button>
-        <button id="champion-btn" class="btn-primary" style="width: 100%; padding: 1rem; font-size: 1.125rem;">
-          ESG Champion
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Supabase Integration -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -349,5 +347,88 @@
   <script src="membership-modal.js"></script>
   <script src="dynamic-navigation.js"></script>
   <script src="logout.js"></script>
+
+  <!-- Legal Modals Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('legal-modal');
+      const titleEl = document.getElementById('legal-modal-title');
+      const bodyEl = document.getElementById('legal-modal-body');
+      const closeBtn = document.getElementById('close-legal-modal');
+
+      const content = {
+        cla: `
+          <h3>Contributor License Agreement (CLA)</h3>
+          <p>A Contributor License Agreement clarifies the intellectual property rights granted by you, the contributor, to the project. It protects you and the project’s ability to use, license, and distribute contributions while you retain your copyright. By agreeing, you grant the project a license to use your contribution.</p>
+          <p>Before agreeing, you must read the full text of the CLA. By checking the box in the registration form and submitting, you agree to be bound by the CLA electronically.</p>
+          <h4>Privacy</h4>
+          <p>Your personal information provided during sign‑up is handled in accordance with our Privacy Policy and used to manage contributions, attribute work, and communicate with you about the project.</p>
+          <h4>Terms & Code of Conduct</h4>
+          <p>All contributors are expected to adhere to the project’s Terms of Service and community Code of Conduct.</p>
+        `,
+        nda: `
+          <h3>Non‑Disclosure Agreement (NDA)</h3>
+          <p>An NDA (Confidentiality/Proprietary Information Agreement) is a legally binding contract that creates a confidential relationship between parties. Its primary purpose is to protect sensitive information shared for a specific purpose from being disclosed to unauthorized third parties.</p>
+          <p>By accepting the NDA, you agree to keep confidential information secret and use it only for the permitted purpose.</p>
+        `,
+        ip: `
+          <h3>IP & Attribution Policy</h3>
+          <p>An IP policy governs ownership, protection, use, and commercialization of intellectual property created within or for an organization, project, or community.</p>
+          <p>It clarifies who owns what and what can be done with it, to avoid disputes, encourage innovation, and protect value. The Attribution Policy sets rules dictating how credit must be given when using, redistributing, or building upon someone else’s work, ensuring creators receive credit and compliance with license requirements.</p>
+        `,
+        terms: `
+          <h3>Terms & Conditions</h3>
+          <p>Please review our Terms & Conditions which govern your use of the site and services.</p>
+          <p><a href="terms.html" target="_blank" class="text-primary" style="text-decoration: underline;">Open full Terms & Conditions in a new tab</a></p>
+        `
+      };
+
+      function openModal(kind) {
+        switch (kind) {
+          case 'cla':
+            titleEl.textContent = 'Contributor License Agreement (CLA)';
+            bodyEl.innerHTML = content.cla;
+            break;
+          case 'nda':
+            titleEl.textContent = 'Non‑Disclosure Agreement (NDA)';
+            bodyEl.innerHTML = content.nda;
+            break;
+          case 'terms':
+            titleEl.textContent = 'Terms & Conditions';
+            bodyEl.innerHTML = content.terms;
+            break;
+          case 'ip':
+            titleEl.textContent = 'IP & Attribution Policy';
+            bodyEl.innerHTML = content.ip;
+            break;
+        }
+        modal.classList.remove('hidden');
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+      }
+
+      // Bind link clicks
+      const claLink = document.getElementById('cla-link');
+      const ndaLink = document.getElementById('nda-link');
+      const termsLink = document.getElementById('terms-link');
+      const ipLink = document.getElementById('ip-link');
+
+      if (claLink) claLink.addEventListener('click', (e) => { e.preventDefault(); openModal('cla'); });
+      if (ndaLink) ndaLink.addEventListener('click', (e) => { e.preventDefault(); openModal('nda'); });
+      if (termsLink) termsLink.addEventListener('click', (e) => { e.preventDefault(); openModal('terms'); });
+      if (ipLink) ipLink.addEventListener('click', (e) => { e.preventDefault(); openModal('ip'); });
+
+      // Close handlers
+      if (closeBtn) closeBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+    });
+  </script>
 </body>
 </html>
